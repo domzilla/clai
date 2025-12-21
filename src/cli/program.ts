@@ -19,6 +19,7 @@ import {
 } from './commands/config.js';
 import { initCommand } from './commands/init.js';
 
+/** Commander.js program instance for CLAI. */
 export const program = new Command();
 
 program.name('clai').description('AI-powered shell command generator').version('1.0.0');

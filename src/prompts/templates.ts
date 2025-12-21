@@ -8,6 +8,10 @@
  * @fileoverview System and user prompt templates for AI requests.
  */
 
+/**
+ * System prompt template with placeholders for system information.
+ * Placeholders: {{OS}}, {{OS_VERSION}}, {{SHELL}}, {{CWD}}, {{COMMAND_COUNT}}
+ */
 export const SYSTEM_PROMPT_TEMPLATE = `You are an expert shell command generator. Your task is to generate shell commands based on natural language descriptions.
 
 ## System Information
@@ -47,6 +51,10 @@ Respond ONLY with valid JSON in this exact format:
 - Consider edge cases and provide robust commands
 - Do not include any text outside the JSON response`;
 
+/**
+ * User prompt template with placeholder for the request.
+ * Placeholder: {{REQUEST}}
+ */
 export const USER_PROMPT_TEMPLATE = `Generate shell commands for the following request:
 
 {{REQUEST}}`;

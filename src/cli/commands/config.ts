@@ -15,6 +15,10 @@ import { SetupWizard } from '../../ui/wizard.js';
 import type { Provider } from '../../config/schema.js';
 import { PROVIDERS, PROVIDER_DISPLAY_NAMES } from '../../config/schema.js';
 
+/**
+ * Displays the current configuration.
+ * Shows provider, model, preferences, and API key status.
+ */
 export async function configShowCommand(): Promise<void> {
     if (!configManager.exists()) {
         console.log(chalk.yellow('No configuration found.'));
@@ -48,6 +52,11 @@ export async function configShowCommand(): Promise<void> {
     console.log('');
 }
 
+/**
+ * Sets a configuration value.
+ * @param key - Configuration key (provider, model, commandCount, showExplanations).
+ * @param value - Value to set.
+ */
 export async function configSetCommand(key: string, value: string): Promise<void> {
     const validKeys = ['provider', 'model', 'commandCount', 'showExplanations'];
 
@@ -91,11 +100,17 @@ export async function configSetCommand(key: string, value: string): Promise<void
     console.log(chalk.green(`Set ${key} = ${value}`));
 }
 
+/**
+ * Resets configuration to default values.
+ */
 export async function configResetCommand(): Promise<void> {
     configManager.reset();
     console.log(chalk.green('Configuration reset to defaults.'));
 }
 
+/**
+ * Runs the interactive setup wizard.
+ */
 export async function configWizardCommand(): Promise<void> {
     const wizard = new SetupWizard(configManager);
     await wizard.run();

@@ -10,6 +10,7 @@
 
 import type { ClaiConfig, Provider } from './schema.js';
 
+/** Default configuration values for new installations. */
 export const DEFAULT_CONFIG: ClaiConfig = {
     defaultProvider: 'openai',
     defaultModel: 'gpt-4o-mini',
@@ -20,6 +21,7 @@ export const DEFAULT_CONFIG: ClaiConfig = {
     },
 };
 
+/** Available models for each provider. */
 export const PROVIDER_MODELS: Record<Provider, string[]> = {
     openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'],
     anthropic: [
@@ -32,6 +34,7 @@ export const PROVIDER_MODELS: Record<Provider, string[]> = {
     groq: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768'],
 };
 
+/** Default model for each provider. */
 export const DEFAULT_MODELS: Record<Provider, string> = {
     openai: 'gpt-4o-mini',
     anthropic: 'claude-3-5-sonnet-20241022',
@@ -39,6 +42,7 @@ export const DEFAULT_MODELS: Record<Provider, string> = {
     groq: 'llama-3.3-70b-versatile',
 };
 
+/** URLs where users can obtain API keys for each provider. */
 export const PROVIDER_API_KEY_URLS: Record<Provider, string> = {
     openai: 'https://platform.openai.com/api-keys',
     anthropic: 'https://console.anthropic.com/settings/keys',
@@ -46,6 +50,7 @@ export const PROVIDER_API_KEY_URLS: Record<Provider, string> = {
     groq: 'https://console.groq.com/keys',
 };
 
+/** Environment variable names for each provider's API key. */
 export const PROVIDER_ENV_VAR_NAMES: Record<Provider, string> = {
     openai: 'OPENAI_API_KEY',
     anthropic: 'ANTHROPIC_API_KEY',
@@ -55,7 +60,7 @@ export const PROVIDER_ENV_VAR_NAMES: Record<Provider, string> = {
 
 /**
  * Creates a deep copy of the default configuration.
- * Use this to avoid mutating the shared DEFAULT_CONFIG object.
+ * @returns A new ClaiConfig object with default values.
  */
 export function createDefaultConfig(): ClaiConfig {
     return {

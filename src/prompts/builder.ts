@@ -11,7 +11,16 @@
 import type { SystemInfo } from '../system/detector.js';
 import { SYSTEM_PROMPT_TEMPLATE, USER_PROMPT_TEMPLATE } from './templates.js';
 
+/**
+ * Builds prompts by interpolating system information into templates.
+ */
 export class PromptBuilder {
+    /**
+     * Builds the system prompt with injected system information.
+     * @param systemInfo - Current system environment details.
+     * @param commandCount - Number of commands to generate.
+     * @returns Complete system prompt string.
+     */
     buildSystemPrompt(systemInfo: SystemInfo, commandCount: number): string {
         return SYSTEM_PROMPT_TEMPLATE.replace('{{OS}}', systemInfo.os)
             .replace('{{OS_VERSION}}', systemInfo.osVersion)
@@ -20,9 +29,15 @@ export class PromptBuilder {
             .replace('{{COMMAND_COUNT}}', commandCount.toString());
     }
 
+    /**
+     * Builds the user prompt with the request.
+     * @param userRequest - Natural language command request.
+     * @returns Complete user prompt string.
+     */
     buildUserPrompt(userRequest: string): string {
         return USER_PROMPT_TEMPLATE.replace('{{REQUEST}}', userRequest);
     }
 }
 
+/** Singleton PromptBuilder instance. */
 export const promptBuilder = new PromptBuilder();

@@ -20,14 +20,26 @@ import { configManager } from '../../config/manager.js';
 import { logError } from '../../utils/errors.js';
 import type { Provider } from '../../config/schema.js';
 
+/** Options for the generate command. */
 export interface GenerateOptions {
+    /** Override the default AI model. */
     model?: string;
+    /** Override the default AI provider. */
     provider?: string;
+    /** Number of commands to generate. */
     count?: string;
+    /** Show detailed command explanations. */
     verbose?: boolean;
+    /** Output only the command without menu. */
     quiet?: boolean;
 }
 
+/**
+ * Handles the main command generation workflow.
+ * Detects system info, calls AI, presents selection, and outputs result.
+ * @param promptParts - Array of prompt words from CLI arguments.
+ * @param options - Generation options from CLI flags.
+ */
 export async function generateCommand(
     promptParts: string[],
     options: GenerateOptions,

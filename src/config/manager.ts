@@ -19,16 +19,28 @@ import {
     createDefaultConfig,
 } from './defaults.js';
 
+/**
+ * Manages CLAI configuration persistence.
+ * Reads and writes configuration to ~/.clai/config.json.
+ */
 export class ConfigManager {
     private configDir: string;
     private configPath: string;
     private config: ClaiConfig | null = null;
 
+    /**
+     * Creates a new ConfigManager instance.
+     * @param configDir - Optional custom config directory path.
+     */
     constructor(configDir?: string) {
         this.configDir = configDir || join(homedir(), '.clai');
         this.configPath = join(this.configDir, 'config.json');
     }
 
+    /**
+     * Checks if a configuration file exists.
+     * @returns True if config file exists.
+     */
     exists(): boolean {
         return existsSync(this.configPath);
     }
@@ -73,10 +85,20 @@ export class ConfigManager {
         writeFileSync(this.configPath, JSON.stringify(this.config, null, 2), 'utf-8');
     }
 
+    /**
+     * Gets a configuration value by key.
+     * @param key - The configuration key to retrieve.
+     * @returns The configuration value.
+     */
     get<K extends keyof ClaiConfig>(key: K): ClaiConfig[K] {
         return this.load()[key];
     }
 
+    /**
+     * Sets a configuration value.
+     * @param key - The configuration key to set.
+     * @param value - The value to set.
+     */
     set<K extends keyof ClaiConfig>(key: K, value: ClaiConfig[K]): void {
         this.load();
         if (this.config) {
@@ -85,15 +107,27 @@ export class ConfigManager {
         }
     }
 
+    /**
+     * Gets the complete configuration object.
+     * @returns The full ClaiConfig object.
+     */
     getAll(): ClaiConfig {
         return this.load();
     }
 
+    /**
+     * Resets configuration to default values.
+     */
     reset(): void {
         this.config = createDefaultConfig();
         this.save();
     }
 
+    /**
+     * Sets an API key for a provider.
+     * @param provider - The provider to set the key for.
+     * @param key - The API key value.
+     */
     setApiKey(provider: Provider, key: string): void {
         const config = this.load();
         if (!config.apiKeys) {
@@ -103,6 +137,12 @@ export class ConfigManager {
         this.save();
     }
 
+    /**
+     * Gets an API key for a provider.
+     * Environment variables take precedence over config file.
+     * @param provider - The provider to get the key for.
+     * @returns The API key or undefined if not set.
+     */
     getApiKey(provider: Provider): string | undefined {
         // First check environment variables
         const envKey = process.env[PROVIDER_ENV_VAR_NAMES[provider]];
@@ -114,10 +154,20 @@ export class ConfigManager {
         return this.load().apiKeys?.[provider];
     }
 
+    /**
+     * Checks if an API key is configured for a provider.
+     * @param provider - The provider to check.
+     * @returns True if an API key is available.
+     */
     hasApiKey(provider: Provider): boolean {
         return !!this.getApiKey(provider);
     }
 
+    /**
+     * Sets a user preference value.
+     * @param key - The preference key to set.
+     * @param value - The preference value.
+     */
     setPreference<K extends keyof Preferences>(key: K, value: Preferences[K]): void {
         const config = this.load();
         if (!config.preferences) {
@@ -127,17 +177,31 @@ export class ConfigManager {
         this.save();
     }
 
+    /**
+     * Gets a user preference value.
+     * @param key - The preference key to retrieve.
+     * @returns The preference value.
+     */
     getPreference<K extends keyof Preferences>(key: K): Preferences[K] {
         return this.load().preferences?.[key] ?? DEFAULT_CONFIG.preferences[key];
     }
 
+    /**
+     * Gets the full path to the config file.
+     * @returns The config file path.
+     */
     getConfigPath(): string {
         return this.configPath;
     }
 
+    /**
+     * Gets the config directory path.
+     * @returns The config directory path.
+     */
     getConfigDir(): string {
         return this.configDir;
     }
 }
 
+/** Singleton ConfigManager instance. */
 export const configManager = new ConfigManager();

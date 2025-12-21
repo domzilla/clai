@@ -11,28 +11,53 @@
 import { platform, type, release, arch, homedir } from 'node:os';
 import { execSync } from 'node:child_process';
 
+/** Supported operating system types. */
 export type OSType = 'windows' | 'macos' | 'linux';
+
+/** Supported shell types. */
 export type ShellType = 'bash' | 'zsh' | 'fish' | 'powershell' | 'cmd' | 'unknown';
 
+/** Complete system information for prompt context. */
 export interface SystemInfo {
+    /** Operating system type. */
     os: OSType;
+    /** Operating system version string. */
     osVersion: string;
+    /** Detected shell type. */
     shell: ShellType;
+    /** Path to the shell executable. */
     shellPath: string;
+    /** Node.js platform identifier. */
     platform: NodeJS.Platform;
+    /** System architecture (x64, arm64, etc.). */
     arch: string;
+    /** Current working directory. */
     cwd: string;
+    /** User's home directory path. */
     homeDir: string;
 }
 
+/** Shell-specific syntax and path information. */
 export interface ShellSpecificInfo {
+    /** Command separator for chaining (&&, &). */
     commandSeparator: string;
+    /** PATH environment variable separator. */
     pathSeparator: string;
+    /** Line ending character(s). */
     lineEnding: string;
+    /** Null device path (/dev/null, NUL). */
     nullDevice: string;
 }
 
+/**
+ * Detects operating system and shell environment.
+ * Provides system context for command generation.
+ */
 export class SystemDetector {
+    /**
+     * Detects complete system information.
+     * @returns System information including OS, shell, and paths.
+     */
     detect(): SystemInfo {
         const platformName = platform();
         const shellPath = this.detectShellPath(platformName);
@@ -85,6 +110,10 @@ export class SystemDetector {
         return 'unknown';
     }
 
+    /**
+     * Gets the version string of the current shell.
+     * @returns Shell version string or undefined if detection fails.
+     */
     getShellVersion(): string | undefined {
         const shell = this.detect().shell;
 
@@ -112,6 +141,10 @@ export class SystemDetector {
         }
     }
 
+    /**
+     * Gets shell-specific syntax information.
+     * @returns Platform-appropriate command separators and paths.
+     */
     getShellSpecificInfo(): ShellSpecificInfo {
         const isWindows = platform() === 'win32';
 
@@ -123,6 +156,10 @@ export class SystemDetector {
         };
     }
 
+    /**
+     * Gets the path to the shell's configuration file.
+     * @returns Path to .bashrc, .zshrc, config.fish, or $PROFILE.
+     */
     getShellConfigFile(): string {
         const info = this.detect();
 
@@ -144,4 +181,5 @@ export class SystemDetector {
     }
 }
 
+/** Singleton SystemDetector instance. */
 export const systemDetector = new SystemDetector();

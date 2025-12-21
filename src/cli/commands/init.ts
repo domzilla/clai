@@ -14,8 +14,13 @@ import chalk from 'chalk';
 import { shellIntegration } from '../../shell/integration.js';
 import type { ShellType } from '../../system/detector.js';
 
+/** Shells that support integration. */
 const VALID_SHELLS: ShellType[] = ['bash', 'zsh', 'fish', 'powershell'];
 
+/**
+ * Displays shell integration setup instructions.
+ * @param shell - Optional shell type (auto-detects if not specified).
+ */
 export async function initCommand(shell?: string): Promise<void> {
     if (shell) {
         // Validate shell argument

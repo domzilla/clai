@@ -16,13 +16,26 @@ import type { Provider } from '../config/schema.js';
 import { PROVIDERS, PROVIDER_DISPLAY_NAMES } from '../config/schema.js';
 import { PROVIDER_MODELS, DEFAULT_MODELS, PROVIDER_API_KEY_URLS } from '../config/defaults.js';
 
+/**
+ * Interactive first-run setup wizard for configuring CLAI.
+ * Guides users through provider selection, API key entry, and preferences.
+ */
 export class SetupWizard {
     private config: ConfigManager;
 
+    /**
+     * Creates a new SetupWizard instance.
+     * @param config - ConfigManager instance to save configuration to.
+     */
     constructor(config: ConfigManager) {
         this.config = config;
     }
 
+    /**
+     * Runs the interactive setup wizard.
+     * Prompts for provider, API key, model, and command count preferences.
+     * @returns Resolves when setup is complete.
+     */
     async run(): Promise<void> {
         console.log(chalk.bold.cyan('\n  Welcome to CLAI - AI-Powered Shell Command Generator\n'));
         console.log(chalk.dim("  Let's set up your configuration.\n"));

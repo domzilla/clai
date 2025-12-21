@@ -14,6 +14,10 @@ import { program } from './cli/program.js';
 import { configManager } from './config/manager.js';
 import { SetupWizard } from './ui/wizard.js';
 
+/**
+ * Main entry point for CLAI.
+ * Runs setup wizard on first use, then parses CLI arguments.
+ */
 async function main(): Promise<void> {
     // Get the command being run
     const args = process.argv.slice(2);
