@@ -9,6 +9,7 @@
  */
 
 import chalk from 'chalk';
+
 import type { ShellType } from '../system/detector.js';
 import { systemDetector } from '../system/detector.js';
 

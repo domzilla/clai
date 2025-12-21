@@ -10,6 +10,7 @@
  */
 
 import chalk from 'chalk';
+
 import { shellIntegration } from '../../shell/integration.js';
 import type { ShellType } from '../../system/detector.js';
 

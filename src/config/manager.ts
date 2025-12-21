@@ -11,6 +11,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
+
 import type { ClaiConfig, Provider, Preferences } from './schema.js';
 import { DEFAULT_CONFIG } from './defaults.js';
 

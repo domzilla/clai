@@ -10,6 +10,7 @@
 
 import { select } from '@inquirer/prompts';
 import chalk from 'chalk';
+
 import type { GeneratedCommand, RiskLevel } from '../providers/llm.js';
 
 const RISK_COLORS: Record<RiskLevel, (text: string) => string> = {
@@ -67,7 +68,7 @@ export class CommandSelector {
             return null;
         }
 
-        return commands[selectedIndex];
+        return commands[selectedIndex] ?? null;
     }
 
     formatForDisplay(commands: GeneratedCommand[], verbose: boolean = false): string {

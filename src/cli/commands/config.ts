@@ -9,6 +9,7 @@
  */
 
 import chalk from 'chalk';
+
 import { configManager } from '../../config/manager.js';
 import { SetupWizard } from '../../ui/wizard.js';
 import type { Provider } from '../../config/schema.js';

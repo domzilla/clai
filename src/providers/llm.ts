@@ -9,6 +9,7 @@
  */
 
 import LLM from '@themaximalist/llm.js';
+
 import type { Provider } from '../config/schema.js';
 import type { SystemInfo } from '../system/detector.js';
 import { configManager } from '../config/manager.js';

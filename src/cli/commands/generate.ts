@@ -12,6 +12,7 @@
 import ora from 'ora';
 import chalk from 'chalk';
 import clipboardy from 'clipboardy';
+
 import { systemDetector } from '../../system/detector.js';
 import { llmProvider } from '../../providers/llm.js';
 import { commandSelector } from '../../ui/selector.js';
@@ -78,7 +79,10 @@ export async function generateCommand(
 
         // In quiet mode, just output the first command
         if (quiet) {
-            console.log(commands[0].command);
+            const firstCommand = commands[0];
+            if (firstCommand) {
+                console.log(firstCommand.command);
+            }
             return;
         }
 

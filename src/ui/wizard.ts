@@ -10,6 +10,7 @@
 
 import { select, password, number } from '@inquirer/prompts';
 import chalk from 'chalk';
+
 import { ConfigManager } from '../config/manager.js';
 import type { Provider } from '../config/schema.js';
 import { PROVIDERS, PROVIDER_DISPLAY_NAMES } from '../config/schema.js';
