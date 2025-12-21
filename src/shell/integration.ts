@@ -155,7 +155,6 @@ export class ShellIntegration {
         console.log(chalk.white(`  Config file: ${chalk.bold(configFile)}\n`));
 
         console.log(chalk.bold('  Step 1: Copy the following snippet:\n'));
-        console.log(chalk.dim('  ─'.repeat(40)));
         console.log(
             chalk.green(
                 snippet
@@ -164,7 +163,6 @@ export class ShellIntegration {
                     .join('\n'),
             ),
         );
-        console.log(chalk.dim('  ─'.repeat(40)));
 
         console.log(chalk.bold('\n  Step 2: Add it to your shell config file:'));
         console.log(
@@ -186,8 +184,7 @@ export class ShellIntegration {
         console.log(chalk.dim('  Type a description and press Alt+a'));
         console.log(chalk.white('    list files by size  →  [Alt+a]  →  ls -lhS\n'));
 
-        console.log(chalk.dim('  ─'.repeat(40)));
-        console.log(chalk.dim('\n  Tip: You can customize the keybinding by changing'));
+        console.log(chalk.dim('  Tip: You can customize the keybinding by changing'));
         console.log(chalk.dim('  \\ea (Alt+a) to another key combination:\n'));
         console.log(chalk.dim('    \\C-g     = Ctrl+g'));
         console.log(chalk.dim('    \\e\\C-a   = Alt+Ctrl+a'));
