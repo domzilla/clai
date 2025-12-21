@@ -30,7 +30,11 @@ async function main(): Promise<void> {
     // If no config exists and not running a no-config command, run wizard
     if (!configManager.exists() && !isNoConfigCommand) {
         const wizard = new SetupWizard(configManager);
-        await wizard.run();
+        const completed = await wizard.run();
+
+        if (!completed) {
+            process.exit(0);
+        }
 
         // If user ran with a prompt, continue to execute it
         if (args.length > 0) {
