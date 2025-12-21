@@ -1,3 +1,13 @@
+/**
+ * @file templates.ts
+ * @module src/prompts/templates
+ * @author Dominic Rodemer
+ * @created 2025-12-21
+ * @license MIT
+ *
+ * @fileoverview System and user prompt templates for AI requests.
+ */
+
 export const SYSTEM_PROMPT_TEMPLATE = `You are an expert shell command generator. Your task is to generate shell commands based on natural language descriptions.
 
 ## System Information

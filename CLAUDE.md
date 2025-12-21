@@ -1,8 +1,12 @@
-# Claude Code Instructions
-
-## Project Overview
+# clai
 
 CLAI is a Node.js/TypeScript CLI that generates shell commands from natural language using AI. It supports multiple providers (OpenAI, Anthropic, Gemini, Groq) and works cross-platform.
+
+## Code Style
+
+**IMPORTANT:** All code in this project MUST strictly follow the [Node.js Style Guide](~/Agents/Style Guides/node-js-style-guide.md). This style guide is mandatory and must be adhered to when writing, modifying, or reviewing any code in this codebase.
+
+Before submitting any code changes, verify they conform to the style guide.
 
 ## Tech Stack
 

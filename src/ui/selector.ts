@@ -1,84 +1,94 @@
+/**
+ * @file selector.ts
+ * @module src/ui/selector
+ * @author Dominic Rodemer
+ * @created 2025-12-21
+ * @license MIT
+ *
+ * @fileoverview Interactive command selection menu with risk indicators.
+ */
+
 import { select } from '@inquirer/prompts';
 import chalk from 'chalk';
 import type { GeneratedCommand, RiskLevel } from '../providers/llm.js';
 
 const RISK_COLORS: Record<RiskLevel, (text: string) => string> = {
-  low: chalk.green,
-  medium: chalk.yellow,
-  high: chalk.red
+    low: chalk.green,
+    medium: chalk.yellow,
+    high: chalk.red,
 };
 
 const RISK_ICONS: Record<RiskLevel, string> = {
-  low: '',
-  medium: '',
-  high: ''
+    low: '',
+    medium: '',
+    high: '',
 };
 
 export class CommandSelector {
-  async select(
-    commands: GeneratedCommand[],
-    verbose: boolean = false
-  ): Promise<GeneratedCommand | null> {
-    if (commands.length === 0) {
-      return null;
+    async select(
+        commands: GeneratedCommand[],
+        verbose: boolean = false,
+    ): Promise<GeneratedCommand | null> {
+        if (commands.length === 0) {
+            return null;
+        }
+
+        // If only one command, still show it for confirmation
+        const choices = commands.map((cmd, index) => {
+            const riskColor = RISK_COLORS[cmd.risk];
+            const riskIcon = RISK_ICONS[cmd.risk];
+
+            let description = `${chalk.dim(cmd.description)}`;
+            if (verbose) {
+                description += `\n    ${chalk.dim(cmd.explanation)}`;
+            }
+            description += `  ${riskColor(`${riskIcon} ${cmd.risk}`)}`;
+
+            return {
+                name: `${chalk.bold(cmd.command)}\n    ${description}`,
+                value: index,
+                short: cmd.command,
+            };
+        });
+
+        // Add cancel option
+        choices.push({
+            name: chalk.dim('Cancel'),
+            value: -1,
+            short: 'Cancel',
+        });
+
+        const selectedIndex = await select<number>({
+            message: 'Select a command:',
+            choices,
+        });
+
+        if (selectedIndex === -1) {
+            return null;
+        }
+
+        return commands[selectedIndex];
     }
 
-    // If only one command, still show it for confirmation
-    const choices = commands.map((cmd, index) => {
-      const riskColor = RISK_COLORS[cmd.risk];
-      const riskIcon = RISK_ICONS[cmd.risk];
+    formatForDisplay(commands: GeneratedCommand[], verbose: boolean = false): string {
+        const lines: string[] = [];
 
-      let description = `${chalk.dim(cmd.description)}`;
-      if (verbose) {
-        description += `\n    ${chalk.dim(cmd.explanation)}`;
-      }
-      description += `  ${riskColor(`${riskIcon} ${cmd.risk}`)}`;
+        commands.forEach((cmd, index) => {
+            const riskColor = RISK_COLORS[cmd.risk];
+            const riskIcon = RISK_ICONS[cmd.risk];
 
-      return {
-        name: `${chalk.bold(cmd.command)}\n    ${description}`,
-        value: index,
-        short: cmd.command
-      };
-    });
+            lines.push(`${chalk.bold.white(`${index + 1}.`)} ${chalk.cyan(cmd.command)}`);
+            lines.push(`   ${chalk.dim(cmd.description)}  ${riskColor(`${riskIcon} ${cmd.risk}`)}`);
 
-    // Add cancel option
-    choices.push({
-      name: chalk.dim('Cancel'),
-      value: -1,
-      short: 'Cancel'
-    });
+            if (verbose) {
+                lines.push(`   ${chalk.dim(cmd.explanation)}`);
+            }
 
-    const selectedIndex = await select<number>({
-      message: 'Select a command:',
-      choices
-    });
+            lines.push('');
+        });
 
-    if (selectedIndex === -1) {
-      return null;
+        return lines.join('\n');
     }
-
-    return commands[selectedIndex];
-  }
-
-  formatForDisplay(commands: GeneratedCommand[], verbose: boolean = false): string {
-    const lines: string[] = [];
-
-    commands.forEach((cmd, index) => {
-      const riskColor = RISK_COLORS[cmd.risk];
-      const riskIcon = RISK_ICONS[cmd.risk];
-
-      lines.push(`${chalk.bold.white(`${index + 1}.`)} ${chalk.cyan(cmd.command)}`);
-      lines.push(`   ${chalk.dim(cmd.description)}  ${riskColor(`${riskIcon} ${cmd.risk}`)}`);
-
-      if (verbose) {
-        lines.push(`   ${chalk.dim(cmd.explanation)}`);
-      }
-
-      lines.push('');
-    });
-
-    return lines.join('\n');
-  }
 }
 
 export const commandSelector = new CommandSelector();
