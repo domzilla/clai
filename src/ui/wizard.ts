@@ -9,9 +9,9 @@
  */
 
 import { select, password, number } from '@inquirer/prompts';
-import chalk from 'chalk';
 
 import { ConfigManager } from '../config/manager.js';
+import { colors } from './colors.js';
 import type { Provider } from '../config/schema.js';
 import { PROVIDERS, PROVIDER_DISPLAY_NAMES } from '../config/schema.js';
 import { PROVIDER_MODELS, DEFAULT_MODELS, PROVIDER_API_KEY_URLS } from '../config/defaults.js';
@@ -37,9 +37,9 @@ export class SetupWizard {
      * @returns True if setup completed, false if cancelled.
      */
     async run(): Promise<boolean> {
-        console.log(chalk.bold.cyan('\n  Welcome to CLAI - AI-Powered Shell Command Generator\n'));
-        console.log(chalk.dim("  Let's set up your configuration."));
-        console.log(chalk.dim('  Press Ctrl+C to cancel.\n'));
+        console.log(colors.header('\n  Welcome to CLAI - AI-Powered Shell Command Generator\n'));
+        console.log(colors.hint("  Let's set up your configuration."));
+        console.log(colors.hint('  Press Ctrl+C to cancel.\n'));
 
         try {
             // Step 1: Select Provider
@@ -50,19 +50,19 @@ export class SetupWizard {
                         name: PROVIDER_DISPLAY_NAMES[p],
                         value: p as Provider | 'cancel',
                     })),
-                    { name: chalk.dim('Cancel'), value: 'cancel' as const },
+                    { name: colors.hint('Cancel'), value: 'cancel' as const },
                 ],
             });
 
             if (providerChoice === 'cancel') {
-                console.log(chalk.dim('\n  Setup cancelled.\n'));
+                console.log(colors.hint('\n  Setup cancelled.\n'));
                 return false;
             }
 
             const provider = providerChoice;
 
             // Step 2: Enter API Key
-            console.log(chalk.dim(`\n  Get your API key at: ${PROVIDER_API_KEY_URLS[provider]}\n`));
+            console.log(colors.hint(`\n  Get your API key at: ${PROVIDER_API_KEY_URLS[provider]}\n`));
 
             const apiKey = await password({
                 message: `Enter your ${PROVIDER_DISPLAY_NAMES[provider]} API key:`,
@@ -106,16 +106,16 @@ export class SetupWizard {
             this.config.setApiKey(provider, apiKey);
             this.config.setPreference('commandCount', commandCount || 3);
 
-            console.log(chalk.green('\n  Configuration saved successfully!'));
-            console.log(chalk.dim(`  Config file: ${this.config.getConfigPath()}\n`));
-            console.log(chalk.cyan('  You can now use CLAI. Try:'));
-            console.log(chalk.white('    clai "list all files in current directory"\n'));
-            console.log(chalk.dim('  For shell integration (optional), run:'));
-            console.log(chalk.white('    clai init\n'));
+            console.log(colors.success('\n  Configuration saved successfully!'));
+            console.log(colors.hint(`  Config file: ${this.config.getConfigPath()}\n`));
+            console.log(colors.value('  You can now use CLAI. Try:'));
+            console.log(colors.command('    clai "list all files in current directory"\n'));
+            console.log(colors.hint('  For shell integration (optional), run:'));
+            console.log(colors.command('    clai init\n'));
 
             return true;
         } catch {
-            console.log(chalk.dim('\n  Setup cancelled.\n'));
+            console.log(colors.hint('\n  Setup cancelled.\n'));
             return false;
         }
     }

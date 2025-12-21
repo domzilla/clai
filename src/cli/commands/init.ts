@@ -9,9 +9,8 @@
  * Displays setup instructions for different shells.
  */
 
-import chalk from 'chalk';
-
 import { shellIntegration } from '../../shell/integration.js';
+import { colors } from '../../ui/colors.js';
 import type { ShellType } from '../../system/detector.js';
 
 /** Shells that support integration. */
@@ -25,8 +24,8 @@ export async function initCommand(shell?: string): Promise<void> {
     if (shell) {
         // Validate shell argument
         if (!VALID_SHELLS.includes(shell as ShellType)) {
-            console.error(chalk.red(`Invalid shell: ${shell}`));
-            console.log(chalk.dim(`Valid shells: ${VALID_SHELLS.join(', ')}`));
+            console.error(colors.error(`Invalid shell: ${shell}`));
+            console.log(colors.hint(`Valid shells: ${VALID_SHELLS.join(', ')}`));
             process.exit(1);
         }
 

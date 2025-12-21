@@ -8,7 +8,7 @@
  * @fileoverview Shared error handling utilities.
  */
 
-import chalk from 'chalk';
+import { colors } from '../ui/colors.js';
 
 /**
  * Extracts a message from an unknown error value.
@@ -37,5 +37,5 @@ export function wrapError(error: unknown, context: string): Error {
  * @param error - The error to log.
  */
 export function logError(error: unknown): void {
-    console.error(chalk.red(`Error: ${getErrorMessage(error)}`));
+    console.error(colors.error(`Error: ${getErrorMessage(error)}`));
 }

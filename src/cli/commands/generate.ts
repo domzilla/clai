@@ -10,13 +10,13 @@
  */
 
 import ora from 'ora';
-import chalk from 'chalk';
 import clipboardy from 'clipboardy';
 
 import { systemDetector } from '../../system/detector.js';
 import { llmProvider } from '../../providers/llm.js';
 import { commandSelector } from '../../ui/selector.js';
 import { configManager } from '../../config/manager.js';
+import { colors } from '../../ui/colors.js';
 import { logError } from '../../utils/errors.js';
 import type { Provider } from '../../config/schema.js';
 
@@ -47,16 +47,16 @@ export async function generateCommand(
     const prompt = promptParts.join(' ').trim();
 
     if (!prompt) {
-        console.log(chalk.yellow('Missing prompt.') + chalk.dim(' Describe what command you need.\n'));
-        console.log(chalk.dim('  Example: clai "list all files larger than 100MB"\n'));
-        console.log(chalk.dim('  Run clai -h for all options.'));
+        console.log(colors.warning('Missing prompt.') + ' Describe what command you need.\n');
+        console.log(colors.hint('  Example: clai "list all files larger than 100MB"\n'));
+        console.log(colors.hint('  Run clai -h for all options.'));
         return;
     }
 
     // Check if config exists, if not run wizard
     if (!configManager.exists()) {
-        console.error(chalk.yellow('No configuration found. Please run the setup wizard first.'));
-        console.log(chalk.dim('\nRun: clai config wizard'));
+        console.error(colors.warning('No configuration found. Please run the setup wizard first.'));
+        console.log(colors.hint('\nRun: clai config wizard'));
         process.exit(1);
     }
 
@@ -87,7 +87,7 @@ export async function generateCommand(
         spinner.stop();
 
         if (commands.length === 0) {
-            console.error(chalk.yellow('No commands generated. Please try a different prompt.'));
+            console.error(colors.warning('No commands generated. Please try a different prompt.'));
             process.exit(1);
         }
 
@@ -111,10 +111,10 @@ export async function generateCommand(
         // Copy to clipboard
         try {
             await clipboardy.write(selected.command);
-            console.error(chalk.dim('\nCommand copied to clipboard!'));
+            console.error(colors.hint('\nCommand copied to clipboard!'));
         } catch {
             // Clipboard might not be available
-            console.error(chalk.dim('\n(Could not copy to clipboard)'));
+            console.error(colors.hint('\n(Could not copy to clipboard)'));
         }
 
         // Output the command to stdout (for shell integration)

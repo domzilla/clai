@@ -28,6 +28,7 @@ Before submitting any code changes, verify they conform to the style guide.
 | `src/config/manager.ts` | Configuration persistence |
 | `src/providers/llm.ts` | AI provider wrapper |
 | `src/system/detector.ts` | OS/shell detection |
+| `src/ui/colors.ts` | Centralized color utility |
 | `src/utils/errors.ts` | Shared error handling utilities |
 
 ## Development Commands
@@ -45,6 +46,12 @@ npm run lint       # Lint code
 2. **API keys**: Environment variables take priority over config file
 3. **Output**: UI goes to stderr, command output to stdout (for shell integration)
 4. **Shell integration**: `clai init` shows instructions only, never modifies files
+
+## UI and Colors
+
+All terminal output styling uses the centralized `colors` utility from `src/ui/colors.ts`. See `doc/COLOR-SCHEME.md` for the complete color scheme and usage guidelines.
+
+**Never use chalk directly**—always import and use the `colors` utility for consistent styling.
 
 ## Code Style
 

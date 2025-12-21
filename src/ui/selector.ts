@@ -9,23 +9,23 @@
  */
 
 import { select } from '@inquirer/prompts';
-import chalk from 'chalk';
 
 import type { RiskLevel } from '../config/schema.js';
 import type { GeneratedCommand } from '../providers/llm.js';
+import { colors } from './colors.js';
 
-/** Color functions for each risk level. */
+/** Risk color functions mapped to colors utility. */
 const RISK_COLORS: Record<RiskLevel, (text: string) => string> = {
-    low: chalk.green,
-    medium: chalk.yellow,
-    high: chalk.red,
+    low: colors.riskLow,
+    medium: colors.riskMedium,
+    high: colors.riskHigh,
 };
 
 /** Unicode icons for each risk level. */
 const RISK_ICONS: Record<RiskLevel, string> = {
-    low: '',
-    medium: '',
-    high: '',
+    low: '●',
+    medium: '●',
+    high: '●',
 };
 
 /**
@@ -60,14 +60,14 @@ export class CommandSelector {
 
         // If only one command, still show it for confirmation
         const choices = commands.map((cmd, index) => {
-            let description = `${chalk.dim(cmd.description)}`;
+            let description = `${colors.hint(cmd.description)}`;
             if (verbose) {
-                description += `\n    ${chalk.dim(cmd.explanation)}`;
+                description += `\n    ${colors.hint(cmd.explanation)}`;
             }
             description += `  ${formatRiskBadge(cmd.risk)}`;
 
             return {
-                name: `${chalk.bold(cmd.command)}\n    ${description}`,
+                name: `${colors.value(cmd.command)}\n    ${description}`,
                 value: index,
                 short: cmd.command,
             };
@@ -75,7 +75,7 @@ export class CommandSelector {
 
         // Add cancel option
         choices.push({
-            name: chalk.dim('Cancel'),
+            name: colors.hint('Cancel'),
             value: -1,
             short: 'Cancel',
         });
@@ -102,11 +102,11 @@ export class CommandSelector {
         const lines: string[] = [];
 
         commands.forEach((cmd, index) => {
-            lines.push(`${chalk.bold.white(`${index + 1}.`)} ${chalk.cyan(cmd.command)}`);
-            lines.push(`   ${chalk.dim(cmd.description)}  ${formatRiskBadge(cmd.risk)}`);
+            lines.push(`${colors.value(`${index + 1}.`)} ${colors.command(cmd.command)}`);
+            lines.push(`   ${colors.hint(cmd.description)}  ${formatRiskBadge(cmd.risk)}`);
 
             if (verbose) {
-                lines.push(`   ${chalk.dim(cmd.explanation)}`);
+                lines.push(`   ${colors.hint(cmd.explanation)}`);
             }
 
             lines.push('');
