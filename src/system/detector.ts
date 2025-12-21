@@ -99,15 +99,44 @@ export class SystemDetector {
     }
 
     private getShellType(shellPath: string): ShellType {
+        // Try to detect current shell from parent process
+        const parentShell = this.getParentProcessShell();
+        if (parentShell !== 'unknown') {
+            return parentShell;
+        }
+
+        // Fall back to parsing shell path from $SHELL
         const shellName = shellPath.split('/').pop()?.toLowerCase() || '';
 
-        if (shellName.includes('bash')) return 'bash';
-        if (shellName.includes('zsh')) return 'zsh';
         if (shellName.includes('fish')) return 'fish';
+        if (shellName.includes('zsh')) return 'zsh';
+        if (shellName.includes('bash')) return 'bash';
         if (shellName.includes('powershell') || shellName.includes('pwsh')) return 'powershell';
         if (shellName.includes('cmd')) return 'cmd';
 
         return 'unknown';
+    }
+
+    private getParentProcessShell(): ShellType {
+        try {
+            const parentName = execSync(`ps -p ${process.ppid} -o comm=`, {
+                encoding: 'utf-8',
+            })
+                .trim()
+                .toLowerCase();
+
+            // Extract just the command name (remove path if present)
+            const name = parentName.split('/').pop() || '';
+
+            if (name.includes('fish')) return 'fish';
+            if (name.includes('zsh')) return 'zsh';
+            if (name.includes('bash')) return 'bash';
+            if (name.includes('pwsh') || name.includes('powershell')) return 'powershell';
+
+            return 'unknown';
+        } catch {
+            return 'unknown';
+        }
     }
 
     /**
