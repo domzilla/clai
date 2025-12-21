@@ -25,14 +25,17 @@ async function main(): Promise<void> {
 
     // Check if this is a subcommand that doesn't need config
     const noConfigCommands = ['config', 'init', '--help', '-h', '--version', '-V'];
-    const needsConfig = !noConfigCommands.some((cmd) => firstArg === cmd);
+    const isNoConfigCommand = noConfigCommands.some((cmd) => firstArg === cmd);
 
-    // If running a command that needs config and no config exists, run wizard
-    if (needsConfig && !configManager.exists() && args.length > 0) {
-        console.log('\n  First time setup required.\n');
+    // If no config exists and not running a no-config command, run wizard
+    if (!configManager.exists() && !isNoConfigCommand) {
         const wizard = new SetupWizard(configManager);
         await wizard.run();
-        console.log('  Now running your command...\n');
+
+        // If user ran with a prompt, continue to execute it
+        if (args.length > 0) {
+            console.log('  Now running your command...\n');
+        }
     }
 
     program.parse(process.argv);

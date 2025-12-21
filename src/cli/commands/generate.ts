@@ -47,9 +47,10 @@ export async function generateCommand(
     const prompt = promptParts.join(' ').trim();
 
     if (!prompt) {
-        console.error(chalk.red('Error: Please provide a prompt describing the command you need.'));
-        console.log(chalk.dim('\nExample: clai "list all files larger than 100MB"'));
-        process.exit(1);
+        console.log(chalk.yellow('Missing prompt.') + chalk.dim(' Describe what command you need.\n'));
+        console.log(chalk.dim('  Example: clai "list all files larger than 100MB"\n'));
+        console.log(chalk.dim('  Run clai -h for all options.'));
+        return;
     }
 
     // Check if config exists, if not run wizard
