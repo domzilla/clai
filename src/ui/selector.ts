@@ -11,7 +11,8 @@
 import { select } from '@inquirer/prompts';
 import chalk from 'chalk';
 
-import type { GeneratedCommand, RiskLevel } from '../providers/llm.js';
+import type { RiskLevel } from '../config/schema.js';
+import type { GeneratedCommand } from '../providers/llm.js';
 
 const RISK_COLORS: Record<RiskLevel, (text: string) => string> = {
     low: chalk.green,
@@ -25,6 +26,12 @@ const RISK_ICONS: Record<RiskLevel, string> = {
     high: '',
 };
 
+function formatRiskBadge(risk: RiskLevel): string {
+    const color = RISK_COLORS[risk];
+    const icon = RISK_ICONS[risk];
+    return color(`${icon} ${risk}`);
+}
+
 export class CommandSelector {
     async select(
         commands: GeneratedCommand[],
@@ -36,14 +43,11 @@ export class CommandSelector {
 
         // If only one command, still show it for confirmation
         const choices = commands.map((cmd, index) => {
-            const riskColor = RISK_COLORS[cmd.risk];
-            const riskIcon = RISK_ICONS[cmd.risk];
-
             let description = `${chalk.dim(cmd.description)}`;
             if (verbose) {
                 description += `\n    ${chalk.dim(cmd.explanation)}`;
             }
-            description += `  ${riskColor(`${riskIcon} ${cmd.risk}`)}`;
+            description += `  ${formatRiskBadge(cmd.risk)}`;
 
             return {
                 name: `${chalk.bold(cmd.command)}\n    ${description}`,
@@ -75,11 +79,8 @@ export class CommandSelector {
         const lines: string[] = [];
 
         commands.forEach((cmd, index) => {
-            const riskColor = RISK_COLORS[cmd.risk];
-            const riskIcon = RISK_ICONS[cmd.risk];
-
             lines.push(`${chalk.bold.white(`${index + 1}.`)} ${chalk.cyan(cmd.command)}`);
-            lines.push(`   ${chalk.dim(cmd.description)}  ${riskColor(`${riskIcon} ${cmd.risk}`)}`);
+            lines.push(`   ${chalk.dim(cmd.description)}  ${formatRiskBadge(cmd.risk)}`);
 
             if (verbose) {
                 lines.push(`   ${chalk.dim(cmd.explanation)}`);

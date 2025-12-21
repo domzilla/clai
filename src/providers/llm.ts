@@ -10,12 +10,15 @@
 
 import LLM from '@themaximalist/llm.js';
 
-import type { Provider } from '../config/schema.js';
+import type { Provider, RiskLevel } from '../config/schema.js';
+import { RISK_LEVELS } from '../config/schema.js';
 import type { SystemInfo } from '../system/detector.js';
 import { configManager } from '../config/manager.js';
+import { PROVIDER_ENV_VAR_NAMES } from '../config/defaults.js';
 import { promptBuilder } from '../prompts/builder.js';
+import { wrapError } from '../utils/errors.js';
 
-export type RiskLevel = 'low' | 'medium' | 'high';
+export type { RiskLevel } from '../config/schema.js';
 
 export interface GeneratedCommand {
     command: string;
@@ -72,22 +75,12 @@ export class LLMProvider {
 
             return this.parseResponse(response as unknown as LLMResponse);
         } catch (error) {
-            if (error instanceof Error) {
-                throw new Error(`Failed to generate commands: ${error.message}`);
-            }
-            throw new Error('Failed to generate commands: Unknown error');
+            throw wrapError(error, 'Failed to generate commands');
         }
     }
 
     private setApiKeyEnv(provider: Provider, apiKey: string): void {
-        const envVarNames: Record<Provider, string> = {
-            openai: 'OPENAI_API_KEY',
-            anthropic: 'ANTHROPIC_API_KEY',
-            gemini: 'GOOGLE_API_KEY',
-            groq: 'GROQ_API_KEY',
-        };
-
-        process.env[envVarNames[provider]] = apiKey;
+        process.env[PROVIDER_ENV_VAR_NAMES[provider]] = apiKey;
     }
 
     private getModelIdentifier(provider: Provider, model: string): string {
@@ -116,8 +109,7 @@ export class LLMProvider {
     }
 
     private validateRisk(risk: string): RiskLevel {
-        const validRisks: RiskLevel[] = ['low', 'medium', 'high'];
-        if (validRisks.includes(risk as RiskLevel)) {
+        if (RISK_LEVELS.includes(risk as RiskLevel)) {
             return risk as RiskLevel;
         }
         return 'medium'; // Default to medium if unknown

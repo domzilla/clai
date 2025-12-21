@@ -17,6 +17,7 @@ import { systemDetector } from '../../system/detector.js';
 import { llmProvider } from '../../providers/llm.js';
 import { commandSelector } from '../../ui/selector.js';
 import { configManager } from '../../config/manager.js';
+import { logError } from '../../utils/errors.js';
 import type { Provider } from '../../config/schema.js';
 
 export interface GenerateOptions {
@@ -107,13 +108,7 @@ export async function generateCommand(
         console.log(selected.command);
     } catch (error) {
         spinner.stop();
-
-        if (error instanceof Error) {
-            console.error(chalk.red(`Error: ${error.message}`));
-        } else {
-            console.error(chalk.red('An unexpected error occurred.'));
-        }
-
+        logError(error);
         process.exit(1);
     }
 }

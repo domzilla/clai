@@ -81,21 +81,30 @@ const SHELL_CONFIG_FILES: Record<ShellType, string> = {
     unknown: 'N/A',
 };
 
+const SHELL_RELOAD_COMMANDS: Partial<Record<ShellType, string>> = {
+    zsh: 'source ~/.zshrc',
+    bash: 'source ~/.bashrc',
+    fish: 'source ~/.config/fish/config.fish',
+    powershell: '. $PROFILE',
+};
+
+function resolveTargetShell(shell?: ShellType): ShellType {
+    return shell || systemDetector.detect().shell;
+}
+
 export class ShellIntegration {
     getSnippet(shell?: ShellType): string {
-        const targetShell = shell || systemDetector.detect().shell;
-        return SHELL_SNIPPETS[targetShell];
+        return SHELL_SNIPPETS[resolveTargetShell(shell)];
     }
 
     getConfigFile(shell?: ShellType): string {
-        const targetShell = shell || systemDetector.detect().shell;
-        return SHELL_CONFIG_FILES[targetShell];
+        return SHELL_CONFIG_FILES[resolveTargetShell(shell)];
     }
 
     printInstructions(shell?: ShellType): void {
-        const targetShell = shell || systemDetector.detect().shell;
-        const snippet = this.getSnippet(targetShell);
-        const configFile = this.getConfigFile(targetShell);
+        const targetShell = resolveTargetShell(shell);
+        const snippet = SHELL_SNIPPETS[targetShell];
+        const configFile = SHELL_CONFIG_FILES[targetShell];
 
         console.log(chalk.bold.cyan('\n  Shell Integration Setup\n'));
 
@@ -141,14 +150,9 @@ export class ShellIntegration {
         }
 
         console.log(chalk.bold('  Step 3: Reload your shell:'));
-        if (targetShell === 'zsh') {
-            console.log(chalk.white('    source ~/.zshrc\n'));
-        } else if (targetShell === 'bash') {
-            console.log(chalk.white('    source ~/.bashrc\n'));
-        } else if (targetShell === 'fish') {
-            console.log(chalk.white('    source ~/.config/fish/config.fish\n'));
-        } else if (targetShell === 'powershell') {
-            console.log(chalk.white('    . $PROFILE\n'));
+        const reloadCommand = SHELL_RELOAD_COMMANDS[targetShell];
+        if (reloadCommand) {
+            console.log(chalk.white(`    ${reloadCommand}\n`));
         }
 
         console.log(chalk.bold('  Step 4: Test it:'));

@@ -37,3 +37,7 @@ export const PROVIDER_DISPLAY_NAMES: Record<Provider, string> = {
     gemini: 'Google Gemini',
     groq: 'Groq',
 };
+
+export type RiskLevel = 'low' | 'medium' | 'high';
+
+export const RISK_LEVELS: RiskLevel[] = ['low', 'medium', 'high'];

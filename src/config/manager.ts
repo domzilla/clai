@@ -13,7 +13,11 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 
 import type { ClaiConfig, Provider, Preferences } from './schema.js';
-import { DEFAULT_CONFIG } from './defaults.js';
+import {
+    DEFAULT_CONFIG,
+    PROVIDER_ENV_VAR_NAMES,
+    createDefaultConfig,
+} from './defaults.js';
 
 export class ConfigManager {
     private configDir: string;
@@ -41,12 +45,7 @@ export class ConfigManager {
         }
 
         if (!this.exists()) {
-            this.config = {
-                defaultProvider: DEFAULT_CONFIG.defaultProvider,
-                defaultModel: DEFAULT_CONFIG.defaultModel,
-                apiKeys: { ...DEFAULT_CONFIG.apiKeys },
-                preferences: { ...DEFAULT_CONFIG.preferences },
-            };
+            this.config = createDefaultConfig();
             return this.config;
         }
 
@@ -64,12 +63,7 @@ export class ConfigManager {
 
             return this.config;
         } catch {
-            this.config = {
-                defaultProvider: DEFAULT_CONFIG.defaultProvider,
-                defaultModel: DEFAULT_CONFIG.defaultModel,
-                apiKeys: { ...DEFAULT_CONFIG.apiKeys },
-                preferences: { ...DEFAULT_CONFIG.preferences },
-            };
+            this.config = createDefaultConfig();
             return this.config;
         }
     }
@@ -96,13 +90,7 @@ export class ConfigManager {
     }
 
     reset(): void {
-        // Deep copy to avoid mutating DEFAULT_CONFIG
-        this.config = {
-            defaultProvider: DEFAULT_CONFIG.defaultProvider,
-            defaultModel: DEFAULT_CONFIG.defaultModel,
-            apiKeys: { ...DEFAULT_CONFIG.apiKeys },
-            preferences: { ...DEFAULT_CONFIG.preferences },
-        };
+        this.config = createDefaultConfig();
         this.save();
     }
 
@@ -117,14 +105,7 @@ export class ConfigManager {
 
     getApiKey(provider: Provider): string | undefined {
         // First check environment variables
-        const envVarNames: Record<Provider, string> = {
-            openai: 'OPENAI_API_KEY',
-            anthropic: 'ANTHROPIC_API_KEY',
-            gemini: 'GOOGLE_API_KEY',
-            groq: 'GROQ_API_KEY',
-        };
-
-        const envKey = process.env[envVarNames[provider]];
+        const envKey = process.env[PROVIDER_ENV_VAR_NAMES[provider]];
         if (envKey) {
             return envKey;
         }

@@ -45,3 +45,23 @@ export const PROVIDER_API_KEY_URLS: Record<Provider, string> = {
     gemini: 'https://aistudio.google.com/app/apikey',
     groq: 'https://console.groq.com/keys',
 };
+
+export const PROVIDER_ENV_VAR_NAMES: Record<Provider, string> = {
+    openai: 'OPENAI_API_KEY',
+    anthropic: 'ANTHROPIC_API_KEY',
+    gemini: 'GOOGLE_API_KEY',
+    groq: 'GROQ_API_KEY',
+};
+
+/**
+ * Creates a deep copy of the default configuration.
+ * Use this to avoid mutating the shared DEFAULT_CONFIG object.
+ */
+export function createDefaultConfig(): ClaiConfig {
+    return {
+        defaultProvider: DEFAULT_CONFIG.defaultProvider,
+        defaultModel: DEFAULT_CONFIG.defaultModel,
+        apiKeys: { ...DEFAULT_CONFIG.apiKeys },
+        preferences: { ...DEFAULT_CONFIG.preferences },
+    };
+}
