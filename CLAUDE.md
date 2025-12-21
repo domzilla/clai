@@ -23,9 +23,12 @@ Before submitting any code changes, verify they conform to the style guide.
 | `src/index.ts` | Entry point |
 | `src/cli/program.ts` | CLI command definitions |
 | `src/cli/commands/generate.ts` | Main command generation logic |
+| `src/config/schema.ts` | Types and shared constants (Provider, RiskLevel) |
+| `src/config/defaults.ts` | Default values and helper functions |
 | `src/config/manager.ts` | Configuration persistence |
 | `src/providers/llm.ts` | AI provider wrapper |
 | `src/system/detector.ts` | OS/shell detection |
+| `src/utils/errors.ts` | Shared error handling utilities |
 
 ## Development Commands
 
@@ -63,8 +66,9 @@ Run with: `npm test`
 ### Adding a new AI provider
 1. Add provider to `Provider` type in `src/config/schema.ts`
 2. Add models to `PROVIDER_MODELS` in `src/config/defaults.ts`
-3. Add prefix mapping in `src/providers/llm.ts`
-4. Add API key URL in `src/config/defaults.ts`
+3. Add env var name to `PROVIDER_ENV_VAR_NAMES` in `src/config/defaults.ts`
+4. Add prefix mapping in `src/providers/llm.ts`
+5. Add API key URL in `src/config/defaults.ts`
 
 ### Adding a new CLI option
 1. Add option in `src/cli/program.ts`
@@ -75,3 +79,16 @@ Run with: `npm test`
 1. Add shell type to `ShellType` in `src/system/detector.ts`
 2. Add snippet to `SHELL_SNIPPETS` in `src/shell/integration.ts`
 3. Add config file path to `SHELL_CONFIG_FILES`
+4. Add reload command to `SHELL_RELOAD_COMMANDS`
+
+## Shared Constants
+
+Centralized constants to avoid duplication:
+
+| Constant | Location | Purpose |
+|----------|----------|---------|
+| `PROVIDERS` | `config/schema.ts` | List of supported providers |
+| `RISK_LEVELS` | `config/schema.ts` | Valid risk level values |
+| `PROVIDER_ENV_VAR_NAMES` | `config/defaults.ts` | Provider to env var mapping |
+| `PROVIDER_MODELS` | `config/defaults.ts` | Available models per provider |
+| `SHELL_RELOAD_COMMANDS` | `shell/integration.ts` | Shell reload commands |

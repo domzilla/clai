@@ -16,8 +16,8 @@ src/
 │       ├── config.ts     # Configuration management commands
 │       └── init.ts       # Shell integration instructions
 ├── config/
-│   ├── schema.ts         # TypeScript interfaces for configuration
-│   ├── defaults.ts       # Default values and provider model lists
+│   ├── schema.ts         # TypeScript interfaces and shared type constants
+│   ├── defaults.ts       # Default values, model lists, and helper functions
 │   └── manager.ts        # Config persistence (read/write ~/.clai/config.json)
 ├── providers/
 │   └── llm.ts            # LLM.js wrapper for AI provider communication
@@ -29,8 +29,10 @@ src/
 ├── ui/
 │   ├── wizard.ts         # First-run setup wizard
 │   └── selector.ts       # Interactive command selection menu
-└── shell/
-    └── integration.ts    # Shell integration snippets for bash/zsh/fish/powershell
+├── shell/
+│   └── integration.ts    # Shell integration snippets for bash/zsh/fish/powershell
+└── utils/
+    └── errors.ts         # Shared error handling utilities
 ```
 
 ## Core Components
@@ -68,7 +70,7 @@ Handles application startup:
 
 ### 3. Configuration Layer (`src/config/`)
 
-**schema.ts**: Type definitions
+**schema.ts**: Type definitions and constants
 ```typescript
 interface ClaiConfig {
   defaultProvider: 'openai' | 'anthropic' | 'gemini' | 'groq';
@@ -76,18 +78,23 @@ interface ClaiConfig {
   apiKeys: { [provider]: string };
   preferences: { commandCount: number; showExplanations: boolean };
 }
+
+type RiskLevel = 'low' | 'medium' | 'high';
+const RISK_LEVELS: RiskLevel[];
 ```
 
 **manager.ts**: Singleton `ConfigManager` class
 - Reads/writes `~/.clai/config.json`
 - Checks environment variables for API keys first
 - Provides typed getters/setters
-- Handles deep copying to prevent mutation of defaults
+- Uses `createDefaultConfig()` helper for deep copying
 
-**defaults.ts**: Static data
+**defaults.ts**: Static data and helpers
 - Default configuration values
 - Available models per provider
 - API key URLs for each provider
+- `PROVIDER_ENV_VAR_NAMES`: Maps providers to environment variable names
+- `createDefaultConfig()`: Creates deep copy of default config
 
 ### 4. AI Provider Layer (`src/providers/`)
 
@@ -132,8 +139,17 @@ interface ClaiConfig {
 
 **integration.ts**: Shell snippets
 - Pre-defined snippets for bash, zsh, fish, powershell
+- `SHELL_RELOAD_COMMANDS`: Maps shells to reload commands
+- `resolveTargetShell()`: Helper for shell detection
 - Instructions for manual setup
 - Config file paths per shell
+
+### 9. Utilities (`src/utils/`)
+
+**errors.ts**: Error handling utilities
+- `getErrorMessage()`: Extracts message from unknown error
+- `wrapError()`: Wraps error with context prefix
+- `logError()`: Logs formatted error to stderr
 
 ## Data Flow
 
@@ -192,6 +208,9 @@ Interactive UI elements (spinner, menu) write to stderr, while the selected comm
 
 ### 6. Unified LLM Interface
 Using LLM.js provides a single API for multiple providers, simplifying provider switching and reducing code duplication.
+
+### 7. Centralized Constants
+Shared constants like `PROVIDER_ENV_VAR_NAMES`, `RISK_LEVELS`, and `SHELL_RELOAD_COMMANDS` are defined once and reused across modules to prevent duplication and ensure consistency.
 
 ## Testing Strategy
 
