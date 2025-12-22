@@ -83,22 +83,58 @@ export class LLMProvider {
         // Set the API key in environment for LLM.js
         this.setApiKeyEnv(provider, apiKey);
 
-        const modelIdentifier = this.getModelIdentifier(provider, model);
+        const service = this.getServiceName(provider);
 
         try {
             // Combine system prompt and user prompt as messages
             const fullPrompt = `${systemPrompt}\n\n${userPrompt}`;
 
-            // Use LLM.js with JSON parser
+            // Use LLM.js to get response
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const response = await (LLM as any)(fullPrompt, {
-                model: modelIdentifier,
-                parser: (LLM as { parsers: { json: unknown } }).parsers.json,
+                service,
+                model,
             });
 
-            return this.parseResponse(response as unknown as LLMResponse);
+            // Parse JSON from response
+            const parsed = JSON.parse(response as string) as LLMResponse;
+            return this.parseResponse(parsed);
         } catch (error) {
-            throw wrapError(error, 'Failed to generate commands');
+            // Provide more helpful error messages
+            const message = error instanceof Error ? error.message : String(error);
+            const cause = error instanceof Error && error.cause ? String(error.cause) : '';
+
+            if (message.includes('fetch failed') || message.includes('ENOTFOUND')) {
+                // Include cause for debugging if available
+                const detail = cause ? ` (${cause})` : '';
+                throw new Error(`Network error: Unable to reach ${provider} API.${detail}`);
+            }
+
+            if (message.includes('401') || message.includes('Unauthorized')) {
+                throw new Error(
+                    `Authentication failed for ${provider}. Check your API key with 'clai config show'.`,
+                );
+            }
+
+            if (message.includes('403') || message.includes('Forbidden')) {
+                throw new Error(
+                    `Access denied by ${provider}. Your API key may not have access to model: ${model}`,
+                );
+            }
+
+            if (message.includes('404') || message.includes('not found')) {
+                throw new Error(`Model not found: ${model}. Check available models for ${provider}.`);
+            }
+
+            if (message.includes('429') || message.includes('rate limit')) {
+                throw new Error(`Rate limited by ${provider}. Please wait and try again.`);
+            }
+
+            if (message.includes('500') || message.includes('502') || message.includes('503')) {
+                throw new Error(`${provider} API is temporarily unavailable. Please try again later.`);
+            }
+
+            throw wrapError(error, `Failed to generate commands via ${provider}`);
         }
     }
 
@@ -106,16 +142,16 @@ export class LLMProvider {
         process.env[PROVIDER_ENV_VAR_NAMES[provider]] = apiKey;
     }
 
-    private getModelIdentifier(provider: Provider, model: string): string {
-        // LLM.js uses specific prefixes for different providers
-        const providerPrefixes: Record<Provider, string> = {
-            openai: '',
-            anthropic: 'anthropic:',
-            gemini: 'google:',
-            groq: 'groq:',
+    private getServiceName(provider: Provider): string {
+        // LLM.js service names for each provider
+        const serviceNames: Record<Provider, string> = {
+            openai: 'openai',
+            anthropic: 'anthropic',
+            gemini: 'google',
+            groq: 'groq',
         };
 
-        return `${providerPrefixes[provider]}${model}`;
+        return serviceNames[provider];
     }
 
     private parseResponse(response: LLMResponse): GeneratedCommand[] {
