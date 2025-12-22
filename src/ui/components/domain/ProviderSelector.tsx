@@ -24,11 +24,20 @@ export interface ProviderSelectorProps {
     onSelect: (provider: Provider) => void;
     /** Callback when user cancels. */
     onCancel?: (() => void) | undefined;
+    /** Callback when user skips. */
+    onSkip?: (() => void) | undefined;
     /** Optional message to display. */
     message?: string | undefined;
     /** Whether to show cancel option. */
     showCancel?: boolean | undefined;
+    /** Whether to show skip option. */
+    showSkip?: boolean | undefined;
+    /** Custom label for skip option. */
+    skipLabel?: string | undefined;
 }
+
+/** Special values for provider selector. */
+type SpecialValue = 'cancel' | 'skip';
 
 /**
  * Provider selection component.
@@ -38,15 +47,25 @@ export function ProviderSelector({
     providers,
     onSelect,
     onCancel,
+    onSkip,
     message,
     showCancel = true,
+    showSkip = false,
+    skipLabel = 'Skip - choose later',
 }: ProviderSelectorProps): React.ReactElement {
-    const items: SelectItem<Provider | 'cancel'>[] = [
+    const items: SelectItem<Provider | SpecialValue>[] = [
         ...providers.map((provider) => ({
             label: PROVIDER_DISPLAY_NAMES[provider],
-            value: provider as Provider | 'cancel',
+            value: provider as Provider | SpecialValue,
         })),
     ];
+
+    if (showSkip) {
+        items.push({
+            label: skipLabel,
+            value: 'skip',
+        });
+    }
 
     if (showCancel) {
         items.push({
@@ -55,9 +74,11 @@ export function ProviderSelector({
         });
     }
 
-    const handleSelect = (value: Provider | 'cancel'): void => {
+    const handleSelect = (value: Provider | SpecialValue): void => {
         if (value === 'cancel') {
             onCancel?.();
+        } else if (value === 'skip') {
+            onSkip?.();
         } else {
             onSelect(value);
         }

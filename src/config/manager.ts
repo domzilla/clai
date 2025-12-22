@@ -47,6 +47,19 @@ export class ConfigManager {
         return existsSync(this.configPath);
     }
 
+    /**
+     * Checks if a valid provider is configured (default provider has an API key).
+     * @returns True if config is ready to use.
+     */
+    isConfigured(): boolean {
+        if (!this.exists()) {
+            return false;
+        }
+        const config = this.load();
+        const provider = config.defaultProvider;
+        return provider !== undefined && this.hasApiKey(provider);
+    }
+
     private ensureConfigDir(): void {
         if (!existsSync(this.configDir)) {
             mkdirSync(this.configDir, { recursive: true });

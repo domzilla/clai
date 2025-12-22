@@ -56,9 +56,9 @@ export async function generateCommand(
         return;
     }
 
-    // Check if config exists, if not run wizard
-    if (!configManager.exists()) {
-        console.error(colors.warning('No configuration found. Please run the setup wizard first.'));
+    // Check if config is valid (has a provider with API key)
+    if (!configManager.isConfigured()) {
+        console.error(colors.warning('No provider configured. Please run the setup wizard first.'));
         console.log(colors.hint('\nRun: clai config wizard'));
         process.exit(1);
     }

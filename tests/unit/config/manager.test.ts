@@ -149,4 +149,30 @@ describe('ConfigManager', () => {
             expect(newManager.getApiKey('openai')).toBe('test-key');
         });
     });
+
+    describe('isConfigured', () => {
+        it('should return false when config does not exist', () => {
+            expect(configManager.isConfigured()).toBe(false);
+        });
+
+        it('should return false when config exists but no API key for default provider', () => {
+            configManager.set('defaultProvider', 'openai');
+            expect(configManager.isConfigured()).toBe(false);
+        });
+
+        it('should return true when config exists and default provider has API key', () => {
+            configManager.set('defaultProvider', 'openai');
+            configManager.setApiKey('openai', 'sk-test-key');
+            expect(configManager.isConfigured()).toBe(true);
+        });
+
+        it('should return false after removing API key for default provider', () => {
+            configManager.set('defaultProvider', 'anthropic');
+            configManager.setApiKey('anthropic', 'sk-test-key');
+            expect(configManager.isConfigured()).toBe(true);
+
+            configManager.removeApiKey('anthropic');
+            expect(configManager.isConfigured()).toBe(false);
+        });
+    });
 });

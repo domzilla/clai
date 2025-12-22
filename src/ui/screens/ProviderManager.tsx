@@ -34,7 +34,7 @@ interface ProviderManagerScreenProps {
 type Action = 'add' | 'update' | 'remove' | 'default';
 
 /** View states for the screen. */
-type ViewState = 'tabs' | 'provider' | 'apiKey' | 'model';
+type ViewState = 'tabs' | 'provider' | 'apiKey' | 'model' | 'newDefaultProvider' | 'newDefaultModel';
 
 /**
  * Provider manager screen component.
@@ -55,6 +55,7 @@ function ProviderManagerScreen({
     const [view, setView] = useState<ViewState>('tabs');
     const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
     const [apiKey, setApiKey] = useState<string | null>(null);
+    const [newDefaultProvider, setNewDefaultProvider] = useState<Provider | null>(null);
 
     // Build available tabs based on state
     const tabs: TabItem<Action>[] = [];
@@ -74,6 +75,7 @@ function ProviderManagerScreen({
         setAction(newAction);
         setSelectedProvider(null);
         setApiKey(null);
+        setNewDefaultProvider(null);
     };
 
     const handleActionConfirm = (): void => {
@@ -93,10 +95,26 @@ function ProviderManagerScreen({
                 setView('model');
             }
         } else if (action === 'remove') {
-            onResult({
-                action: 'remove',
-                provider,
-            });
+            if (provider === defaultProvider) {
+                // Removing the default provider - need to select new default
+                const remainingProviders = configuredProviders.filter((p) => p !== provider);
+                if (remainingProviders.length > 0) {
+                    // Show new default selection
+                    setView('newDefaultProvider');
+                } else {
+                    // No other providers - proceed with remove (will leave config empty)
+                    onResult({
+                        action: 'remove',
+                        provider,
+                    });
+                }
+            } else {
+                // Not the default, just remove
+                onResult({
+                    action: 'remove',
+                    provider,
+                });
+            }
         }
     };
 
@@ -124,12 +142,38 @@ function ProviderManagerScreen({
         });
     };
 
+    const handleNewDefaultProviderSelect = (provider: Provider): void => {
+        setNewDefaultProvider(provider);
+        setView('newDefaultModel');
+    };
+
+    const handleNewDefaultModelSelect = (model: string): void => {
+        onResult({
+            action: 'remove',
+            provider: selectedProvider!,
+            newDefaultProvider: newDefaultProvider!,
+            newDefaultModel: model,
+        });
+    };
+
+    const handleSkipNewDefault = (): void => {
+        // Remove the provider without setting a new default
+        onResult({
+            action: 'remove',
+            provider: selectedProvider!,
+        });
+    };
+
     const handleCancel = (): void => {
         if (view === 'tabs') {
             onResult({ action: 'cancel' });
         } else if (view === 'model' && action === 'add') {
             setView('apiKey');
         } else if (view === 'apiKey') {
+            setView('provider');
+        } else if (view === 'newDefaultModel') {
+            setView('newDefaultProvider');
+        } else if (view === 'newDefaultProvider') {
             setView('provider');
         } else {
             setView('tabs');
@@ -146,6 +190,11 @@ function ProviderManagerScreen({
             case 'default':
                 return configuredProviders;
         }
+    };
+
+    // Get remaining providers for new default selection
+    const getRemainingProviders = (): Provider[] => {
+        return configuredProviders.filter((p) => p !== selectedProvider);
     };
 
     // Get message for current action
@@ -231,12 +280,32 @@ function ProviderManagerScreen({
                 />
             )}
 
-            {action === 'remove' && view === 'provider' && selectedProvider === defaultProvider && (
-                <Box marginTop={1}>
-                    <Text color={theme.colors.warning}>
-                        Warning: {PROVIDER_DISPLAY_NAMES[defaultProvider]} is your default provider.
-                    </Text>
+            {view === 'newDefaultProvider' && selectedProvider && (
+                <Box flexDirection="column">
+                    <Box marginBottom={1}>
+                        <Text color={theme.colors.warning}>
+                            {PROVIDER_DISPLAY_NAMES[selectedProvider]} is your default provider.
+                        </Text>
+                    </Box>
+                    <ProviderSelector
+                        providers={getRemainingProviders()}
+                        message="Select new default provider:"
+                        onSelect={handleNewDefaultProviderSelect}
+                        onCancel={handleCancel}
+                        onSkip={handleSkipNewDefault}
+                        showCancel={false}
+                        showSkip={true}
+                    />
                 </Box>
+            )}
+
+            {view === 'newDefaultModel' && newDefaultProvider && (
+                <ModelSelector
+                    provider={newDefaultProvider}
+                    message={`Select default model for ${PROVIDER_DISPLAY_NAMES[newDefaultProvider]}:`}
+                    onSelect={handleNewDefaultModelSelect}
+                    onCancel={handleCancel}
+                />
             )}
         </Box>
     );

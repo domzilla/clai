@@ -27,8 +27,8 @@ async function main(): Promise<void> {
     const noConfigCommands = ['config', 'init', '--help', '-h', '--version', '-V'];
     const isNoConfigCommand = noConfigCommands.some((cmd) => firstArg === cmd);
 
-    // If no config exists and not running a no-config command, run wizard
-    if (!configManager.exists() && !isNoConfigCommand) {
+    // If no valid config exists and not running a no-config command, run wizard
+    if (!configManager.isConfigured() && !isNoConfigCommand) {
         const wizard = new SetupWizard(configManager);
         const completed = await wizard.run();
 

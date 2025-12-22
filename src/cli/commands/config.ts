@@ -230,16 +230,21 @@ export async function configProviderCommand(): Promise<void> {
 
         case 'remove':
             if (result.provider) {
-                if (result.provider === defaultProvider) {
-                    console.log(
-                        colors.warning(
-                            `\n  Warning: ${PROVIDER_DISPLAY_NAMES[result.provider]} is your default provider.`,
-                        ),
-                    );
-                    console.log(colors.hint('  You may need to run "clai config wizard" to set a new default.\n'));
-                }
                 configManager.removeApiKey(result.provider);
-                console.log(colors.success(`\n  ${PROVIDER_DISPLAY_NAMES[result.provider]} removed.\n`));
+                console.log(colors.success(`\n  ${PROVIDER_DISPLAY_NAMES[result.provider]} removed.`));
+
+                // If new default was selected, update it
+                if (result.newDefaultProvider && result.newDefaultModel) {
+                    configManager.set('defaultProvider', result.newDefaultProvider);
+                    configManager.set('defaultModel', result.newDefaultModel);
+                    console.log(colors.success(`  Default provider changed to ${PROVIDER_DISPLAY_NAMES[result.newDefaultProvider]}`));
+                    console.log(colors.hint(`  Model: ${result.newDefaultModel}`));
+                } else if (result.provider === defaultProvider) {
+                    // No other providers configured - warn user
+                    console.log(colors.warning('  No providers configured.'));
+                    console.log(colors.hint('  Run "clai config wizard" to set up a provider.'));
+                }
+                console.log('');
             }
             break;
 

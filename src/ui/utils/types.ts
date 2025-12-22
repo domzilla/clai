@@ -55,6 +55,10 @@ export interface ProviderManagerResult {
     apiKey?: string | undefined;
     /** Model selected (if applicable). */
     model?: string | undefined;
+    /** New default provider when removing the current default. */
+    newDefaultProvider?: Provider | undefined;
+    /** New default model when removing the current default. */
+    newDefaultModel?: string | undefined;
 }
 
 /** Result from model manager screen. */
