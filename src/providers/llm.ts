@@ -123,7 +123,9 @@ export class LLMProvider {
             }
 
             if (message.includes('404') || message.includes('not found')) {
-                throw new Error(`Model not found: ${model}. Check available models for ${provider}.`);
+                throw new Error(
+                    `Model not found: ${model}. Run 'clai config model' to select a different model.`,
+                );
             }
 
             if (message.includes('429') || message.includes('rate limit')) {
