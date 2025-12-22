@@ -174,7 +174,6 @@ function SetupWizardScreen({
                 <Text color={palette.secondaryText}>Step: </Text>
                 {STEPS.map((step, idx) => {
                     const isSelected = idx === stepIndex;
-                    const isCompleted = idx < maxStepIndex || (idx === maxStepIndex && idx < stepIndex);
                     const isAccessible = idx <= maxStepIndex;
                     return (
                         <Text key={step.value}>
@@ -190,7 +189,7 @@ function SetupWizardScreen({
                                 }
                                 {...(isSelected && { backgroundColor: palette.active })}
                             >
-                                {' '}{step.label}{isCompleted ? ' ✓' : ''}{' '}
+                                {' '}{step.label}{' '}
                             </Text>
                         </Text>
                     );
