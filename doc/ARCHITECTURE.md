@@ -18,7 +18,7 @@ src/
 ├── config/
 │   ├── schema.ts         # TypeScript interfaces and shared type constants
 │   ├── defaults.ts       # Default values, model lists, and helper functions
-│   └── manager.ts        # Config persistence (read/write ~/.clai/config.json)
+│   └── manager.ts        # Config persistence (read/write ~/.clai/config)
 ├── providers/
 │   └── llm.ts            # LLM.js wrapper for AI provider communication
 ├── prompts/
@@ -27,8 +27,34 @@ src/
 ├── system/
 │   └── detector.ts       # OS and shell detection
 ├── ui/
-│   ├── wizard.ts         # First-run setup wizard
-│   └── selector.ts       # Interactive command selection menu
+│   ├── colors.ts         # Centralized terminal color utilities
+│   ├── selector.ts       # Command selection facade
+│   ├── wizard.ts         # Setup wizard facade and helper functions
+│   ├── components/
+│   │   ├── base/         # Reusable ink components
+│   │   │   ├── Tabs.tsx          # Horizontal tab navigation
+│   │   │   ├── Select.tsx        # Vertical list selection
+│   │   │   ├── TextInput.tsx     # Text input with cursor
+│   │   │   ├── PasswordInput.tsx # Masked password input
+│   │   │   ├── NumberInput.tsx   # Number input with validation
+│   │   │   └── Spinner.tsx       # Animated loading indicator
+│   │   └── domain/       # Domain-specific components
+│   │       ├── ProviderSelector.tsx
+│   │       ├── ModelSelector.tsx
+│   │       ├── CommandSelector.tsx
+│   │       └── ApiKeyInput.tsx
+│   ├── screens/          # Full-screen ink applications
+│   │   ├── CommandPicker.tsx     # Command selection after generation
+│   │   ├── ModelManager.tsx      # Model selection with provider tabs
+│   │   ├── ProviderManager.tsx   # Provider management with action tabs
+│   │   └── SetupWizard.tsx       # First-run setup wizard
+│   ├── hooks/            # Shared React hooks
+│   │   ├── useKeyboardNav.ts     # Arrow key navigation
+│   │   └── useExit.ts            # Escape/Ctrl+C handling
+│   └── utils/            # UI utilities
+│       ├── render.ts             # ink render wrapper with Promise
+│       ├── theme.ts              # Theme configuration
+│       └── types.ts              # Shared UI types
 ├── shell/
 │   └── integration.ts    # Shell integration snippets for bash/zsh/fish/powershell
 └── utils/
@@ -84,7 +110,7 @@ const RISK_LEVELS: RiskLevel[];
 ```
 
 **manager.ts**: Singleton `ConfigManager` class
-- Reads/writes `~/.clai/config.json`
+- Reads/writes `~/.clai/config` (TOML format)
 - Checks environment variables for API keys first
 - Provides typed getters/setters
 - Uses `createDefaultConfig()` helper for deep copying
@@ -124,16 +150,35 @@ const RISK_LEVELS: RiskLevel[];
 
 ### 7. UI Layer (`src/ui/`)
 
-**wizard.ts**: Setup wizard using Inquirer.js
-- Provider selection
-- API key input (masked)
-- Model selection
-- Preferences configuration
+The UI layer uses **ink** (React for CLI) for interactive terminal interfaces with horizontal tab navigation.
 
-**selector.ts**: Command selection
-- Displays commands with descriptions and risk levels
-- Color-coded risk indicators (green/yellow/red)
-- Returns selected command or null on cancel
+**Component Architecture**:
+- **Base Components** (`components/base/`): Reusable UI primitives
+  - `Tabs`: Horizontal tab navigation (←/→ arrows)
+  - `Select`: Vertical list selection (↑/↓ arrows)
+  - `TextInput`, `PasswordInput`, `NumberInput`: Input components
+  - `Spinner`: Animated loading indicator
+
+- **Domain Components** (`components/domain/`): Business-specific components
+  - `ProviderSelector`: Provider selection list
+  - `ModelSelector`: Model selection for a provider
+  - `CommandSelector`: Command list with risk badges
+  - `ApiKeyInput`: API key entry with URL hint
+
+- **Screens** (`screens/`): Full-screen ink applications
+  - `CommandPicker`: Command selection after generation
+  - `ModelManager`: Model selection with provider tabs
+  - `ProviderManager`: Provider management with action tabs [Add][Update][Remove][Set Default]
+  - `SetupWizard`: First-run setup with step indicator tabs
+
+- **Hooks** (`hooks/`): Shared React hooks
+  - `useKeyboardNav`: Arrow key navigation for lists and tabs
+  - `useExit`: Escape/Ctrl+C cancellation handling
+
+**Facade Layer**:
+- `wizard.ts`: Exports helper functions (`selectProvider`, `enterApiKey`, `selectModel`) and `SetupWizard` class
+- `selector.ts`: Exports `CommandSelector` class with `select()` and `formatForDisplay()` methods
+- `colors.ts`: Centralized chalk-based styling utilities
 
 ### 8. Shell Integration (`src/shell/`)
 
@@ -224,7 +269,8 @@ Shared constants like `PROVIDER_ENV_VAR_NAMES`, `RISK_LEVELS`, and `SHELL_RELOAD
 |---------|---------|
 | @themaximalist/llm.js | Unified AI provider API |
 | commander | CLI framework |
-| @inquirer/prompts | Interactive prompts |
-| chalk | Terminal styling |
-| ora | Loading spinners |
+| ink | React for CLI (terminal UI) |
+| react | React runtime for ink |
+| chalk | Terminal styling (via colors.ts) |
 | clipboardy | Clipboard access |
+| smol-toml | TOML config parsing |

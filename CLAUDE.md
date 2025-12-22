@@ -13,6 +13,7 @@ Before submitting any code changes, verify they conform to the style guide.
 - **Language**: TypeScript (ES modules)
 - **Runtime**: Node.js >= 18
 - **CLI Framework**: Commander.js
+- **UI Library**: ink (React for CLI)
 - **AI Library**: LLM.js (@themaximalist/llm.js)
 - **Testing**: Jest with ts-jest
 
@@ -29,6 +30,10 @@ Before submitting any code changes, verify they conform to the style guide.
 | `src/providers/llm.ts` | AI provider wrapper |
 | `src/system/detector.ts` | OS/shell detection |
 | `src/ui/colors.ts` | Centralized color utility |
+| `src/ui/wizard.ts` | Setup wizard facade and helper functions |
+| `src/ui/selector.ts` | Command selection facade |
+| `src/ui/components/base/` | Reusable ink components (Tabs, Select, etc.) |
+| `src/ui/screens/` | Full-screen ink apps (SetupWizard, ProviderManager, etc.) |
 | `src/utils/errors.ts` | Shared error handling utilities |
 
 ## Development Commands
@@ -87,6 +92,18 @@ Run with: `npm test`
 2. Add snippet to `SHELL_SNIPPETS` in `src/shell/integration.ts`
 3. Add config file path to `SHELL_CONFIG_FILES`
 4. Add reload command to `SHELL_RELOAD_COMMANDS`
+
+### Adding a new UI component
+1. Create component in `src/ui/components/base/` (reusable) or `src/ui/components/domain/` (specific)
+2. Use existing hooks (`useKeyboardNav`, `useExit`) for keyboard handling
+3. Export from the appropriate `index.ts`
+4. For full screens, create in `src/ui/screens/` with a `run*` function wrapper
+
+### Adding a new screen
+1. Create screen component in `src/ui/screens/`
+2. Export a `run*` function that uses `renderAndWait()` from `src/ui/utils/render.ts`
+3. Define result type in `src/ui/utils/types.ts`
+4. Use existing domain components where possible
 
 ## Shared Constants
 
