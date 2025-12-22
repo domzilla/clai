@@ -144,6 +144,18 @@ export class ConfigManager {
     }
 
     /**
+     * Removes an API key for a provider.
+     * @param provider - The provider to remove the key for.
+     */
+    removeApiKey(provider: Provider): void {
+        const config = this.load();
+        if (config.apiKeys) {
+            delete config.apiKeys[provider];
+            this.save();
+        }
+    }
+
+    /**
      * Gets an API key for a provider.
      * Environment variables take precedence over config file.
      * @param provider - The provider to get the key for.
