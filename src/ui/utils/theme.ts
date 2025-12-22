@@ -17,8 +17,10 @@ import { colors } from '../colors.js';
 export const theme = {
     /** Colors for different UI elements. */
     colors: {
-        /** Active/selected item highlight. */
-        active: 'cyan',
+        /** Active/selected item highlight (background). */
+        active: 'blue',
+        /** Active/selected item text (contrasts with active background). */
+        activeText: 'black',
         /** Inactive/unselected items. */
         inactive: 'white',
         /** Disabled items. */

@@ -267,14 +267,13 @@ function ProviderManagerScreen({
                             const isSelected = idx === actionIndex;
                             return (
                                 <Text key={action.value}>
-                                    {idx > 0 && <Text color={theme.colors.hint}> | </Text>}
+                                    {idx > 0 && <Text> </Text>}
                                     <Text
                                         bold={isSelected}
-                                        color={isSelected ? theme.colors.active : theme.colors.hint}
+                                        color={isSelected ? theme.colors.activeText : theme.colors.hint}
+                                        {...(isSelected && { backgroundColor: theme.colors.active })}
                                     >
-                                        {isSelected ? '[' : ' '}
-                                        {action.label}
-                                        {isSelected ? ']' : ' '}
+                                        {' '}{action.label}{' '}
                                     </Text>
                                 </Text>
                             );

@@ -178,21 +178,19 @@ function SetupWizardScreen({
                     const isAccessible = idx <= maxStepIndex;
                     return (
                         <Text key={step.value}>
-                            {idx > 0 && <Text color={theme.colors.hint}> | </Text>}
+                            {idx > 0 && <Text> </Text>}
                             <Text
                                 bold={isSelected}
                                 color={
                                     isSelected
-                                        ? theme.colors.active
+                                        ? theme.colors.activeText
                                         : isAccessible
                                             ? theme.colors.hint
                                             : theme.colors.disabled
                                 }
+                                {...(isSelected && { backgroundColor: theme.colors.active })}
                             >
-                                {isSelected ? '[' : ' '}
-                                {step.label}
-                                {isCompleted && ' ✓'}
-                                {isSelected ? ']' : ' '}
+                                {' '}{step.label}{isCompleted ? ' ✓' : ''}{' '}
                             </Text>
                         </Text>
                     );

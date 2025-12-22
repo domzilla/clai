@@ -113,15 +113,13 @@ function ModelManagerScreen({
                         const isDefault = provider === defaultProvider;
                         return (
                             <Text key={provider}>
-                                {idx > 0 && <Text color={theme.colors.hint}> | </Text>}
+                                {idx > 0 && <Text> </Text>}
                                 <Text
                                     bold={isSelected}
-                                    color={isSelected ? theme.colors.active : theme.colors.hint}
+                                    color={isSelected ? theme.colors.activeText : theme.colors.hint}
+                                    {...(isSelected && { backgroundColor: theme.colors.active })}
                                 >
-                                    {isSelected ? '[' : ' '}
-                                    {PROVIDER_DISPLAY_NAMES[provider]}
-                                    {isDefault ? '*' : ''}
-                                    {isSelected ? ']' : ' '}
+                                    {' '}{PROVIDER_DISPLAY_NAMES[provider]}{isDefault ? '*' : ''}{' '}
                                 </Text>
                             </Text>
                         );
