@@ -180,6 +180,7 @@ function SetupWizardScreen({
                             {idx > 0 && <Text> </Text>}
                             <Text
                                 bold={isSelected}
+                                underline
                                 color={
                                     isSelected
                                         ? palette.activeText

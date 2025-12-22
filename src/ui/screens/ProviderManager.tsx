@@ -270,6 +270,7 @@ function ProviderManagerScreen({
                                     {idx > 0 && <Text> </Text>}
                                     <Text
                                         bold={isSelected}
+                                        underline
                                         color={isSelected ? palette.activeText : palette.secondaryText}
                                         {...(isSelected && { backgroundColor: palette.active })}
                                     >
