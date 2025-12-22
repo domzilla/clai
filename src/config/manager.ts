@@ -5,12 +5,14 @@
  * @created 2025-12-21
  * @license MIT
  *
- * @fileoverview Configuration persistence with read/write to ~/.clai/config.json.
+ * @fileoverview Configuration persistence with read/write to ~/.clai/config.
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
+
+import TOML from '@iarna/toml';
 
 import type { ClaiConfig, Provider, Preferences } from './schema.js';
 import {
@@ -21,7 +23,7 @@ import {
 
 /**
  * Manages CLAI configuration persistence.
- * Reads and writes configuration to ~/.clai/config.json.
+ * Reads and writes configuration to ~/.clai/config.
  */
 export class ConfigManager {
     private configDir: string;
@@ -34,7 +36,7 @@ export class ConfigManager {
      */
     constructor(configDir?: string) {
         this.configDir = configDir || join(homedir(), '.clai');
-        this.configPath = join(this.configDir, 'config.json');
+        this.configPath = join(this.configDir, 'config');
     }
 
     /**
@@ -63,7 +65,7 @@ export class ConfigManager {
 
         try {
             const content = readFileSync(this.configPath, 'utf-8');
-            const parsed = JSON.parse(content) as Partial<ClaiConfig>;
+            const parsed = TOML.parse(content) as Partial<ClaiConfig>;
 
             // Merge with defaults to ensure all fields exist
             this.config = {
@@ -82,7 +84,11 @@ export class ConfigManager {
 
     private save(): void {
         this.ensureConfigDir();
-        writeFileSync(this.configPath, JSON.stringify(this.config, null, 2), 'utf-8');
+        writeFileSync(
+            this.configPath,
+            TOML.stringify(this.config as unknown as TOML.JsonMap),
+            'utf-8',
+        );
     }
 
     /**

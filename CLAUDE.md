@@ -42,7 +42,7 @@ npm run lint       # Lint code
 
 ## Architecture Notes
 
-1. **Config location**: `~/.clai/config.json`
+1. **Config location**: `~/.clai/config`
 2. **API keys**: Environment variables take priority over config file
 3. **Output**: UI goes to stderr, command output to stdout (for shell integration)
 4. **Shell integration**: `clai init` shows instructions only, never modifies files
