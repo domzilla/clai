@@ -9,8 +9,9 @@
  * Handles the workflow from prompt to command selection and output.
  */
 
-import ora from 'ora';
 import clipboardy from 'clipboardy';
+import React from 'react';
+import { render, Box } from 'ink';
 
 import { systemDetector } from '../../system/detector.js';
 import { llmProvider } from '../../providers/llm.js';
@@ -20,19 +21,20 @@ import { colors } from '../../ui/colors.js';
 import { logError } from '../../utils/errors.js';
 import type { Provider } from '../../config/schema.js';
 import { DEFAULT_MODELS, PROVIDER_MODELS } from '../../config/defaults.js';
+import { Spinner } from '../../ui/components/base/Spinner.js';
 
 /** Options for the generate command. */
 export interface GenerateOptions {
     /** Override the default AI model. */
-    model?: string;
+    model?: string | undefined;
     /** Override the default AI provider. */
-    provider?: string;
+    provider?: string | undefined;
     /** Number of commands to generate. */
-    count?: string;
+    count?: string | undefined;
     /** Show detailed command explanations. */
-    verbose?: boolean;
+    verbose?: boolean | undefined;
     /** Output only the command without menu. */
-    quiet?: boolean;
+    quiet?: boolean | undefined;
 }
 
 /**
@@ -89,17 +91,21 @@ export async function generateCommand(
     const count = options.count
         ? parseInt(options.count, 10)
         : configManager.getPreference('commandCount');
-    const verbose = options.verbose || configManager.getPreference('showExplanations');
-    const quiet = options.quiet || false;
+    const verbose = options.verbose ?? configManager.getPreference('showExplanations');
+    const quiet = options.quiet ?? false;
 
     // Detect system info
     const systemInfo = systemDetector.detect();
 
-    // Show spinner while generating
-    const spinner = ora({
-        text: 'Generating commands...',
-        stream: process.stderr, // Use stderr for spinner so stdout can be captured
-    }).start();
+    // Show spinner while generating (render to stderr)
+    const spinnerInstance = render(
+        React.createElement(
+            Box,
+            null,
+            React.createElement(Spinner, { text: 'Generating commands...' }),
+        ),
+        { stdout: process.stderr },
+    );
 
     try {
         const commands = await llmProvider.generateCommands(prompt, systemInfo, {
@@ -108,7 +114,7 @@ export async function generateCommand(
             count,
         });
 
-        spinner.stop();
+        spinnerInstance.unmount();
 
         if (commands.length === 0) {
             console.error(colors.warning('No commands generated. Please try a different prompt.'));
@@ -144,7 +150,7 @@ export async function generateCommand(
         // Output the command to stdout (for shell integration)
         console.log(selected.command);
     } catch (error) {
-        spinner.stop();
+        spinnerInstance.unmount();
         logError(error);
         process.exit(1);
     }

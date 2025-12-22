@@ -8,13 +8,17 @@
  * @fileoverview First-run setup wizard for API key and model configuration.
  */
 
-import { select, password, number } from '@inquirer/prompts';
-
 import { ConfigManager } from '../config/manager.js';
 import { colors } from './colors.js';
 import type { Provider } from '../config/schema.js';
-import { PROVIDERS, PROVIDER_DISPLAY_NAMES } from '../config/schema.js';
-import { PROVIDER_MODELS, DEFAULT_MODELS, PROVIDER_API_KEY_URLS } from '../config/defaults.js';
+import { runSetupWizard } from './screens/SetupWizard.js';
+import { runProviderManager } from './screens/ProviderManager.js';
+import { runModelManager } from './screens/ModelManager.js';
+import { renderAndWait } from './utils/render.js';
+import React from 'react';
+import { ProviderSelector } from './components/domain/ProviderSelector.js';
+import { ApiKeyInput } from './components/domain/ApiKeyInput.js';
+import { ModelSelector } from './components/domain/ModelSelector.js';
 
 /**
  * Prompts user to select a provider from available options.
@@ -25,13 +29,15 @@ import { PROVIDER_MODELS, DEFAULT_MODELS, PROVIDER_API_KEY_URLS } from '../confi
  * @returns Selected provider, or null if cancelled.
  */
 export async function selectProvider(options?: {
-    exclude?: Provider[];
-    includeOnly?: Provider[];
-    message?: string;
+    exclude?: Provider[] | undefined;
+    includeOnly?: Provider[] | undefined;
+    message?: string | undefined;
 }): Promise<Provider | null> {
-    const exclude = options?.exclude || [];
+    const exclude = options?.exclude ?? [];
     const includeOnly = options?.includeOnly;
-    const message = options?.message || 'Select a provider:';
+    const message = options?.message ?? 'Select a provider:';
+
+    const { PROVIDERS } = await import('../config/schema.js');
 
     let availableProviders = PROVIDERS.filter((p) => !exclude.includes(p));
     if (includeOnly) {
@@ -42,22 +48,15 @@ export async function selectProvider(options?: {
         return null;
     }
 
-    try {
-        const provider = await select<Provider | 'cancel'>({
+    return renderAndWait<Provider>((context) =>
+        React.createElement(ProviderSelector, {
+            providers: availableProviders,
             message,
-            choices: [
-                ...availableProviders.map((p) => ({
-                    name: PROVIDER_DISPLAY_NAMES[p],
-                    value: p as Provider | 'cancel',
-                })),
-                { name: colors.hint('Cancel'), value: 'cancel' as const },
-            ],
-        });
-
-        return provider === 'cancel' ? null : provider;
-    } catch {
-        return null;
-    }
+            onSelect: (provider: Provider) => context.resolve(provider),
+            onCancel: () => context.cancel(),
+            showCancel: true,
+        }),
+    );
 }
 
 /**
@@ -66,24 +65,13 @@ export async function selectProvider(options?: {
  * @returns The API key, or null if cancelled.
  */
 export async function enterApiKey(provider: Provider): Promise<string | null> {
-    console.log(colors.hint(`\n  Get your API key at: ${PROVIDER_API_KEY_URLS[provider]}\n`));
-
-    try {
-        const apiKey = await password({
-            message: `Enter your ${PROVIDER_DISPLAY_NAMES[provider]} API key:`,
-            mask: '*',
-            validate: (input) => {
-                if (!input || input.length === 0) {
-                    return 'API key is required';
-                }
-                return true;
-            },
-        });
-
-        return apiKey;
-    } catch {
-        return null;
-    }
+    return renderAndWait<string>((context) =>
+        React.createElement(ApiKeyInput, {
+            provider,
+            onSubmit: (apiKey: string) => context.resolve(apiKey),
+            onCancel: () => context.cancel(),
+        }),
+    );
 }
 
 /**
@@ -94,25 +82,17 @@ export async function enterApiKey(provider: Provider): Promise<string | null> {
  */
 export async function selectModel(
     provider: Provider,
-    currentModel?: string,
+    currentModel?: string | undefined,
 ): Promise<string | null> {
-    const models = PROVIDER_MODELS[provider];
-    const defaultModel = currentModel || DEFAULT_MODELS[provider];
-
-    try {
-        const model = await select<string>({
+    return renderAndWait<string>((context) =>
+        React.createElement(ModelSelector, {
+            provider,
+            currentModel,
             message: 'Select your default model:',
-            choices: models.map((m) => ({
-                name: currentModel && m === currentModel ? `${m} (current)` : m,
-                value: m,
-            })),
-            default: defaultModel,
-        });
-
-        return model;
-    } catch {
-        return null;
-    }
+            onSelect: (model: string) => context.resolve(model),
+            onCancel: () => context.cancel(),
+        }),
+    );
 }
 
 /**
@@ -136,67 +116,28 @@ export class SetupWizard {
      * @returns True if setup completed, false if cancelled.
      */
     async run(): Promise<boolean> {
-        console.log(colors.header('\n  Welcome to CLAI - AI-Powered Shell Command Generator\n'));
-        console.log(colors.hint("  Let's set up your configuration."));
-        console.log(colors.hint('  Press Ctrl+C to cancel.\n'));
+        const result = await runSetupWizard();
 
-        try {
-            // Step 1: Select Provider
-            const provider = await selectProvider({
-                message: 'Select your preferred AI provider:',
-            });
-
-            if (!provider) {
-                console.log(colors.hint('\n  Setup cancelled.\n'));
-                return false;
-            }
-
-            // Step 2: Enter API Key
-            const apiKey = await enterApiKey(provider);
-
-            if (!apiKey) {
-                console.log(colors.hint('\n  Setup cancelled.\n'));
-                return false;
-            }
-
-            // Step 3: Select Default Model
-            const model = await selectModel(provider);
-            if (!model) {
-                console.log(colors.hint('\n  Setup cancelled.\n'));
-                return false;
-            }
-
-            // Step 4: Configure command count
-            const commandCount = await number({
-                message: 'How many command options should be generated? (1-10):',
-                default: 3,
-                min: 1,
-                max: 10,
-                validate: (input) => {
-                    if (input === undefined || input < 1 || input > 10) {
-                        return 'Please enter a number between 1 and 10';
-                    }
-                    return true;
-                },
-            });
-
-            // Save configuration
-            this.config.set('defaultProvider', provider);
-            this.config.set('defaultModel', model);
-            this.config.setApiKey(provider, apiKey);
-            this.config.setPreference('commandCount', commandCount || 3);
-
-            console.log(colors.success('\n  Configuration saved successfully!'));
-            console.log(colors.hint(`  Config file: ${this.config.getConfigPath()}\n`));
-            console.log(colors.value('  You can now use CLAI. Try:'));
-            console.log(colors.command('    clai "list all files in current directory"\n'));
-            console.log(colors.hint('  For shell integration (optional), run:'));
-            console.log(colors.command('    clai init\n'));
-
-            return true;
-        } catch {
+        if (!result.completed) {
             console.log(colors.hint('\n  Setup cancelled.\n'));
             return false;
         }
+
+        // Save configuration
+        this.config.set('defaultProvider', result.provider!);
+        this.config.set('defaultModel', result.model!);
+        this.config.setApiKey(result.provider!, result.apiKey!);
+        this.config.setPreference('commandCount', result.commandCount ?? 3);
+
+        console.log(colors.success('\n  Configuration saved successfully!'));
+        console.log(colors.hint(`  Config file: ${this.config.getConfigPath()}\n`));
+        console.log(colors.value('  You can now use CLAI. Try:'));
+        console.log(colors.command('    clai "list all files in current directory"\n'));
+        console.log(colors.hint('  For shell integration (optional), run:'));
+        console.log(colors.command('    clai init\n'));
+
+        return true;
     }
 }
+
+export { runProviderManager, runModelManager };

@@ -133,7 +133,7 @@ describe('ConfigManager', () => {
     describe('getConfigPath/getConfigDir', () => {
         it('should return correct paths', () => {
             expect(configManager.getConfigDir()).toBe(tempDir);
-            expect(configManager.getConfigPath()).toBe(join(tempDir, 'config.json'));
+            expect(configManager.getConfigPath()).toBe(join(tempDir, 'config'));
         });
     });
 

@@ -8,10 +8,12 @@
  * @fileoverview Configuration management commands (show, set, reset, wizard).
  */
 
-import { select } from '@inquirer/prompts';
-
 import { configManager } from '../../config/manager.js';
-import { SetupWizard, selectModel, selectProvider, enterApiKey } from '../../ui/wizard.js';
+import {
+    SetupWizard,
+    runProviderManager,
+    runModelManager,
+} from '../../ui/wizard.js';
 import { colors } from '../../ui/colors.js';
 import type { Provider } from '../../config/schema.js';
 import { PROVIDERS, PROVIDER_DISPLAY_NAMES } from '../../config/schema.js';
@@ -167,50 +169,24 @@ export async function configModelCommand(): Promise<void> {
     }
 
     const configuredProviders = PROVIDERS.filter((p) => configManager.hasApiKey(p));
-    const defaultProvider = configManager.get('defaultProvider');
+    const currentProvider = configManager.get('defaultProvider');
     const currentModel = configManager.get('defaultModel');
 
-    console.log(colors.header('\n  Select Model\n'));
+    const result = await runModelManager(configuredProviders, currentProvider, currentModel);
 
-    let provider: Provider;
-
-    // If multiple providers configured, let user choose which one
-    if (configuredProviders.length > 1) {
-        console.log(colors.hint(`  Current: ${PROVIDER_DISPLAY_NAMES[defaultProvider]} / ${currentModel}\n`));
-
-        const selectedProvider = await selectProvider({
-            includeOnly: configuredProviders,
-            message: 'Select provider to configure:',
-        });
-
-        if (!selectedProvider) {
-            console.log(colors.hint('\n  Cancelled.\n'));
-            return;
-        }
-
-        provider = selectedProvider;
-    } else {
-        provider = defaultProvider;
-        console.log(colors.hint(`  Provider: ${PROVIDER_DISPLAY_NAMES[provider]}`));
-        console.log(colors.hint(`  Current model: ${currentModel}\n`));
-    }
-
-    const model = await selectModel(
-        provider,
-        provider === defaultProvider ? currentModel : undefined,
-    );
-
-    if (model) {
-        // If changing provider, update both provider and model
-        if (provider !== defaultProvider) {
-            configManager.set('defaultProvider', provider);
-            console.log(colors.success(`\n  Default provider changed to: ${PROVIDER_DISPLAY_NAMES[provider]}`));
-        }
-        configManager.set('defaultModel', model);
-        console.log(colors.success(`  Model updated to: ${model}\n`));
-    } else {
+    if (!result) {
         console.log(colors.hint('\n  Cancelled.\n'));
+        return;
     }
+
+    // Update provider if changed
+    if (result.provider !== currentProvider) {
+        configManager.set('defaultProvider', result.provider);
+        console.log(colors.success(`\n  Default provider changed to: ${PROVIDER_DISPLAY_NAMES[result.provider]}`));
+    }
+
+    configManager.set('defaultModel', result.model);
+    console.log(colors.success(`  Model updated to: ${result.model}\n`));
 }
 
 /**
@@ -224,166 +200,56 @@ export async function configProviderCommand(): Promise<void> {
         return;
     }
 
-    // Get configured providers
     const configuredProviders = PROVIDERS.filter((p) => configManager.hasApiKey(p));
-    const unconfiguredProviders = PROVIDERS.filter((p) => !configManager.hasApiKey(p));
+    const defaultProvider = configManager.get('defaultProvider');
 
-    console.log(colors.header('\n  Manage Providers\n'));
-    console.log(colors.hint('  Configured providers:'));
-    if (configuredProviders.length === 0) {
-        console.log(colors.hint('    (none)\n'));
-    } else {
-        for (const p of configuredProviders) {
-            console.log(`    ${colors.success('●')} ${PROVIDER_DISPLAY_NAMES[p]}`);
-        }
-        console.log('');
-    }
+    const result = await runProviderManager(configuredProviders, defaultProvider);
 
-    // Build action choices based on what's available
-    type Action = 'add' | 'update' | 'remove' | 'default' | 'cancel';
-    const actionChoices: { name: string; value: Action }[] = [];
-
-    if (unconfiguredProviders.length > 0) {
-        actionChoices.push({ name: 'Add a new provider', value: 'add' });
-    }
-    if (configuredProviders.length > 0) {
-        actionChoices.push({ name: 'Update API key', value: 'update' });
-        if (configuredProviders.length > 1) {
-            actionChoices.push({ name: 'Set default provider', value: 'default' });
-        }
-        actionChoices.push({ name: 'Remove a provider', value: 'remove' });
-    }
-    actionChoices.push({ name: colors.hint('Cancel'), value: 'cancel' });
-
-    try {
-        const action = await select<Action>({
-            message: 'What would you like to do?',
-            choices: actionChoices,
-        });
-
-        if (action === 'cancel') {
-            console.log(colors.hint('\n  Cancelled.\n'));
-            return;
-        }
-
-        if (action === 'add') {
-            const provider = await selectProvider({
-                includeOnly: unconfiguredProviders,
-                message: 'Select a provider to add:',
-            });
-
-            if (!provider) {
-                console.log(colors.hint('\n  Cancelled.\n'));
-                return;
-            }
-
-            const apiKey = await enterApiKey(provider);
-
-            if (!apiKey) {
-                console.log(colors.hint('\n  Cancelled.\n'));
-                return;
-            }
-
-            configManager.setApiKey(provider, apiKey);
-
-            // Select default model for the new provider
-            console.log('');
-            const model = await selectModel(provider);
-
-            if (!model) {
-                console.log(colors.hint('\n  Cancelled.\n'));
-                return;
-            }
-
-            // Set as default provider and model
-            configManager.set('defaultProvider', provider);
-            configManager.set('defaultModel', model);
-
-            console.log(colors.success(`\n  ${PROVIDER_DISPLAY_NAMES[provider]} added and set as default!`));
-            console.log(colors.hint(`  Model: ${model}\n`));
-        }
-
-        if (action === 'default') {
-            const currentDefault = configManager.get('defaultProvider');
-            const provider = await selectProvider({
-                includeOnly: configuredProviders,
-                message: `Set default provider (current: ${PROVIDER_DISPLAY_NAMES[currentDefault]}):`,
-            });
-
-            if (!provider) {
-                console.log(colors.hint('\n  Cancelled.\n'));
-                return;
-            }
-
-            if (provider === currentDefault) {
-                console.log(colors.hint(`\n  ${PROVIDER_DISPLAY_NAMES[provider]} is already the default.\n`));
-                return;
-            }
-
-            // Select model for the new default provider
-            console.log('');
-            const model = await selectModel(provider);
-
-            if (!model) {
-                console.log(colors.hint('\n  Cancelled.\n'));
-                return;
-            }
-
-            configManager.set('defaultProvider', provider);
-            configManager.set('defaultModel', model);
-
-            console.log(colors.success(`\n  Default provider changed to ${PROVIDER_DISPLAY_NAMES[provider]}`));
-            console.log(colors.hint(`  Model: ${model}\n`));
-        }
-
-        if (action === 'update') {
-            const provider = await selectProvider({
-                includeOnly: configuredProviders,
-                message: 'Select a provider to update:',
-            });
-
-            if (!provider) {
-                console.log(colors.hint('\n  Cancelled.\n'));
-                return;
-            }
-
-            const apiKey = await enterApiKey(provider);
-
-            if (!apiKey) {
-                console.log(colors.hint('\n  Cancelled.\n'));
-                return;
-            }
-
-            configManager.setApiKey(provider, apiKey);
-            console.log(colors.success(`\n  ${PROVIDER_DISPLAY_NAMES[provider]} API key updated!\n`));
-        }
-
-        if (action === 'remove') {
-            const provider = await selectProvider({
-                includeOnly: configuredProviders,
-                message: 'Select a provider to remove:',
-            });
-
-            if (!provider) {
-                console.log(colors.hint('\n  Cancelled.\n'));
-                return;
-            }
-
-            // Check if this is the default provider
-            const defaultProvider = configManager.get('defaultProvider');
-            if (provider === defaultProvider) {
-                console.log(
-                    colors.warning(
-                        `\n  Warning: ${PROVIDER_DISPLAY_NAMES[provider]} is your default provider.`,
-                    ),
-                );
-                console.log(colors.hint('  You may need to run "clai config wizard" to set a new default.\n'));
-            }
-
-            configManager.removeApiKey(provider);
-            console.log(colors.success(`\n  ${PROVIDER_DISPLAY_NAMES[provider]} removed.\n`));
-        }
-    } catch {
+    if (result.action === 'cancel') {
         console.log(colors.hint('\n  Cancelled.\n'));
+        return;
+    }
+
+    switch (result.action) {
+        case 'add':
+            if (result.provider && result.apiKey && result.model) {
+                configManager.setApiKey(result.provider, result.apiKey);
+                configManager.set('defaultProvider', result.provider);
+                configManager.set('defaultModel', result.model);
+                console.log(colors.success(`\n  ${PROVIDER_DISPLAY_NAMES[result.provider]} added and set as default!`));
+                console.log(colors.hint(`  Model: ${result.model}\n`));
+            }
+            break;
+
+        case 'update':
+            if (result.provider && result.apiKey) {
+                configManager.setApiKey(result.provider, result.apiKey);
+                console.log(colors.success(`\n  ${PROVIDER_DISPLAY_NAMES[result.provider]} API key updated!\n`));
+            }
+            break;
+
+        case 'remove':
+            if (result.provider) {
+                if (result.provider === defaultProvider) {
+                    console.log(
+                        colors.warning(
+                            `\n  Warning: ${PROVIDER_DISPLAY_NAMES[result.provider]} is your default provider.`,
+                        ),
+                    );
+                    console.log(colors.hint('  You may need to run "clai config wizard" to set a new default.\n'));
+                }
+                configManager.removeApiKey(result.provider);
+                console.log(colors.success(`\n  ${PROVIDER_DISPLAY_NAMES[result.provider]} removed.\n`));
+            }
+            break;
+
+        case 'default':
+            if (result.provider && result.model) {
+                configManager.set('defaultProvider', result.provider);
+                configManager.set('defaultModel', result.model);
+                console.log(colors.success(`\n  Default provider changed to ${PROVIDER_DISPLAY_NAMES[result.provider]}`));
+                console.log(colors.hint(`  Model: ${result.model}\n`));
+            }
+            break;
     }
 }

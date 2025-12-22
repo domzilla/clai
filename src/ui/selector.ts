@@ -8,11 +8,10 @@
  * @fileoverview Interactive command selection menu with risk indicators.
  */
 
-import { select } from '@inquirer/prompts';
-
 import type { RiskLevel } from '../config/schema.js';
 import type { GeneratedCommand } from '../providers/llm.js';
 import { colors } from './colors.js';
+import { runCommandPicker } from './screens/CommandPicker.js';
 
 /** Risk color functions mapped to colors utility. */
 const RISK_COLORS: Record<RiskLevel, (text: string) => string> = {
@@ -58,38 +57,7 @@ export class CommandSelector {
             return null;
         }
 
-        // If only one command, still show it for confirmation
-        const choices = commands.map((cmd, index) => {
-            let description = `${colors.hint(cmd.description)}`;
-            if (verbose) {
-                description += `\n    ${colors.hint(cmd.explanation)}`;
-            }
-            description += `  ${formatRiskBadge(cmd.risk)}`;
-
-            return {
-                name: `${colors.value(cmd.command)}\n    ${description}`,
-                value: index,
-                short: cmd.command,
-            };
-        });
-
-        // Add cancel option
-        choices.push({
-            name: colors.hint('Cancel'),
-            value: -1,
-            short: 'Cancel',
-        });
-
-        const selectedIndex = await select<number>({
-            message: 'Select a command:',
-            choices,
-        });
-
-        if (selectedIndex === -1) {
-            return null;
-        }
-
-        return commands[selectedIndex] ?? null;
+        return runCommandPicker(commands, verbose);
     }
 
     /**
