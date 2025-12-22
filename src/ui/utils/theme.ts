@@ -19,8 +19,8 @@ export const theme = {
     colors: {
         /** Active/selected item highlight (background). */
         active: 'blue',
-        /** Active/selected item text (contrasts with active background). */
-        activeText: '#000000',
+        /** Active/selected item text. */
+        activeText: 'black',
         /** Inactive/unselected items. */
         inactive: 'white',
         /** Disabled items. */
