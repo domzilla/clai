@@ -66,15 +66,12 @@ export async function generateCommand(
     const defaultProvider = configManager.get('defaultProvider');
     const provider = (options.provider as Provider) || defaultProvider;
 
-    // Determine model: use explicit option, or if provider changed, use that provider's default
+    // Determine model: use explicit option, or provider's configured model, or provider's default
     let model: string;
     if (options.model) {
         model = options.model;
-    } else if (options.provider && options.provider !== defaultProvider) {
-        // Provider overridden without explicit model - use provider's default model
-        model = DEFAULT_MODELS[provider];
     } else {
-        model = configManager.get('defaultModel');
+        model = configManager.getModel(provider) ?? DEFAULT_MODELS[provider];
     }
 
     // Validate model is available for the provider

@@ -83,8 +83,8 @@ export class ConfigManager {
             // Merge with defaults to ensure all fields exist
             this.config = {
                 defaultProvider: parsed.defaultProvider || DEFAULT_CONFIG.defaultProvider,
-                defaultModel: parsed.defaultModel || DEFAULT_CONFIG.defaultModel,
                 apiKeys: { ...DEFAULT_CONFIG.apiKeys, ...parsed.apiKeys },
+                models: { ...DEFAULT_CONFIG.models, ...parsed.models },
                 preferences: { ...DEFAULT_CONFIG.preferences, ...parsed.preferences },
             };
 
@@ -157,15 +157,18 @@ export class ConfigManager {
     }
 
     /**
-     * Removes an API key for a provider.
-     * @param provider - The provider to remove the key for.
+     * Removes an API key and model for a provider.
+     * @param provider - The provider to remove.
      */
     removeApiKey(provider: Provider): void {
         const config = this.load();
         if (config.apiKeys) {
             delete config.apiKeys[provider];
-            this.save();
         }
+        if (config.models) {
+            delete config.models[provider];
+        }
+        this.save();
     }
 
     /**
@@ -192,6 +195,29 @@ export class ConfigManager {
      */
     hasApiKey(provider: Provider): boolean {
         return !!this.getApiKey(provider);
+    }
+
+    /**
+     * Sets the default model for a provider.
+     * @param provider - The provider to set the model for.
+     * @param model - The model identifier.
+     */
+    setModel(provider: Provider, model: string): void {
+        const config = this.load();
+        if (!config.models) {
+            config.models = {};
+        }
+        config.models[provider] = model;
+        this.save();
+    }
+
+    /**
+     * Gets the default model for a provider.
+     * @param provider - The provider to get the model for.
+     * @returns The model identifier or undefined if not set.
+     */
+    getModel(provider: Provider): string | undefined {
+        return this.load().models?.[provider];
     }
 
     /**

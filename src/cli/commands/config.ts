@@ -17,7 +17,7 @@ import {
 import { colors } from '../../ui/colors.js';
 import type { Provider } from '../../config/schema.js';
 import { PROVIDERS, PROVIDER_DISPLAY_NAMES } from '../../config/schema.js';
-import { PROVIDER_MODELS } from '../../config/defaults.js';
+import { DEFAULT_MODELS, PROVIDER_MODELS } from '../../config/defaults.js';
 
 /**
  * Displays the current configuration.
@@ -36,23 +36,35 @@ export async function configShowCommand(): Promise<void> {
     console.log(colors.hint(`  Config file: ${configManager.getConfigPath()}\n`));
 
     console.log(
-        colors.label('  Provider:      ') +
+        colors.label('  Default Provider: ') +
             colors.value(PROVIDER_DISPLAY_NAMES[config.defaultProvider]),
     );
-    console.log(colors.label('  Model:         ') + colors.value(config.defaultModel));
     console.log(
-        colors.label('  Command count: ') + colors.value(String(config.preferences.commandCount)),
+        colors.label('  Command count:    ') + colors.value(String(config.preferences.commandCount)),
     );
     console.log(
-        colors.label('  Explanations:  ') +
+        colors.label('  Explanations:     ') +
             colors.value(config.preferences.showExplanations ? 'Yes' : 'No'),
     );
 
-    console.log(colors.label('\n  API Keys:'));
+    console.log(colors.label('\n  Providers:'));
     for (const provider of PROVIDERS) {
         const hasKey = configManager.hasApiKey(provider);
-        const status = hasKey ? colors.success('configured') : colors.hint('not set');
-        console.log(`    ${PROVIDER_DISPLAY_NAMES[provider]}: ${status}`);
+        if (hasKey) {
+            const model = configManager.getModel(provider) ?? DEFAULT_MODELS[provider];
+            const isDefault = provider === config.defaultProvider;
+            const defaultMarker = isDefault ? colors.hint(' (default)') : '';
+            console.log(`    ${colors.success('●')} ${PROVIDER_DISPLAY_NAMES[provider]}${defaultMarker}`);
+            console.log(`      ${colors.hint('Model:')} ${model}`);
+        }
+    }
+
+    const unconfigured = PROVIDERS.filter((p) => !configManager.hasApiKey(p));
+    if (unconfigured.length > 0) {
+        console.log(colors.hint('\n  Not configured:'));
+        for (const provider of unconfigured) {
+            console.log(`    ${colors.hint('○')} ${PROVIDER_DISPLAY_NAMES[provider]}`);
+        }
     }
 
     console.log('');
@@ -83,39 +95,19 @@ export async function configSetCommand(key: string, value: string): Promise<void
             break;
 
         case 'model': {
-            // Validate model exists for some provider
+            // Validate model exists for the current provider
             const currentProvider = configManager.get('defaultProvider');
             const currentProviderModels = PROVIDER_MODELS[currentProvider];
 
             if (currentProviderModels.includes(value)) {
                 // Model is valid for current provider
-                configManager.set('defaultModel', value);
+                configManager.setModel(currentProvider, value);
             } else {
-                // Check if model is valid for any other provider
-                const matchingProvider = PROVIDERS.find((p) =>
-                    PROVIDER_MODELS[p].includes(value),
+                console.error(colors.error(`Unknown model: ${value}`));
+                console.log(
+                    colors.hint(`Models for ${PROVIDER_DISPLAY_NAMES[currentProvider]}: ${currentProviderModels.join(', ')}`),
                 );
-
-                if (matchingProvider) {
-                    console.log(
-                        colors.warning(
-                            `Model '${value}' is for ${PROVIDER_DISPLAY_NAMES[matchingProvider]}, not ${PROVIDER_DISPLAY_NAMES[currentProvider]}.`,
-                        ),
-                    );
-                    console.log(
-                        colors.hint(
-                            `Switching default provider to ${PROVIDER_DISPLAY_NAMES[matchingProvider]}.`,
-                        ),
-                    );
-                    configManager.set('defaultProvider', matchingProvider);
-                    configManager.set('defaultModel', value);
-                } else {
-                    console.error(colors.error(`Unknown model: ${value}`));
-                    console.log(
-                        colors.hint(`Models for ${currentProvider}: ${currentProviderModels.join(', ')}`),
-                    );
-                    process.exit(1);
-                }
+                process.exit(1);
             }
             break;
         }
@@ -158,8 +150,8 @@ export async function configWizardCommand(): Promise<void> {
 
 /**
  * Runs an interactive model selection wizard.
- * Shows available models for the selected provider.
- * If multiple providers are configured, allows provider selection first.
+ * Shows available models for each configured provider.
+ * Updates the model for the selected provider without changing the default provider.
  */
 export async function configModelCommand(): Promise<void> {
     if (!configManager.exists()) {
@@ -169,24 +161,24 @@ export async function configModelCommand(): Promise<void> {
     }
 
     const configuredProviders = PROVIDERS.filter((p) => configManager.hasApiKey(p));
-    const currentProvider = configManager.get('defaultProvider');
-    const currentModel = configManager.get('defaultModel');
+    const defaultProvider = configManager.get('defaultProvider');
 
-    const result = await runModelManager(configuredProviders, currentProvider, currentModel);
+    // Build map of current models for each configured provider
+    const providerModels: Record<string, string | undefined> = {};
+    for (const provider of configuredProviders) {
+        providerModels[provider] = configManager.getModel(provider) ?? DEFAULT_MODELS[provider];
+    }
+
+    const result = await runModelManager(configuredProviders, defaultProvider, providerModels);
 
     if (!result) {
         console.log(colors.hint('\n  Cancelled.\n'));
         return;
     }
 
-    // Update provider if changed
-    if (result.provider !== currentProvider) {
-        configManager.set('defaultProvider', result.provider);
-        console.log(colors.success(`\n  Default provider changed to: ${PROVIDER_DISPLAY_NAMES[result.provider]}`));
-    }
-
-    configManager.set('defaultModel', result.model);
-    console.log(colors.success(`  Model updated to: ${result.model}\n`));
+    // Only update the model for the selected provider (don't change default provider)
+    configManager.setModel(result.provider, result.model);
+    console.log(colors.success(`\n  ${PROVIDER_DISPLAY_NAMES[result.provider]} model set to: ${result.model}\n`));
 }
 
 /**
@@ -214,8 +206,8 @@ export async function configProviderCommand(): Promise<void> {
         case 'add':
             if (result.provider && result.apiKey && result.model) {
                 configManager.setApiKey(result.provider, result.apiKey);
+                configManager.setModel(result.provider, result.model);
                 configManager.set('defaultProvider', result.provider);
-                configManager.set('defaultModel', result.model);
                 console.log(colors.success(`\n  ${PROVIDER_DISPLAY_NAMES[result.provider]} added and set as default!`));
                 console.log(colors.hint(`  Model: ${result.model}\n`));
             }
@@ -236,7 +228,7 @@ export async function configProviderCommand(): Promise<void> {
                 // If new default was selected, update it
                 if (result.newDefaultProvider && result.newDefaultModel) {
                     configManager.set('defaultProvider', result.newDefaultProvider);
-                    configManager.set('defaultModel', result.newDefaultModel);
+                    configManager.setModel(result.newDefaultProvider, result.newDefaultModel);
                     console.log(colors.success(`  Default provider changed to ${PROVIDER_DISPLAY_NAMES[result.newDefaultProvider]}`));
                     console.log(colors.hint(`  Model: ${result.newDefaultModel}`));
                 } else if (result.provider === defaultProvider) {
@@ -249,11 +241,9 @@ export async function configProviderCommand(): Promise<void> {
             break;
 
         case 'default':
-            if (result.provider && result.model) {
+            if (result.provider) {
                 configManager.set('defaultProvider', result.provider);
-                configManager.set('defaultModel', result.model);
-                console.log(colors.success(`\n  Default provider changed to ${PROVIDER_DISPLAY_NAMES[result.provider]}`));
-                console.log(colors.hint(`  Model: ${result.model}\n`));
+                console.log(colors.success(`\n  Default provider changed to ${PROVIDER_DISPLAY_NAMES[result.provider]}\n`));
             }
             break;
     }

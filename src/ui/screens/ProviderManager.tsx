@@ -92,7 +92,11 @@ function ProviderManagerScreen({
                 // Already default, go back
                 setView('tabs');
             } else {
-                setView('model');
+                // Each provider has its own model, just switch default provider
+                onResult({
+                    action: 'default',
+                    provider,
+                });
             }
         } else if (action === 'remove') {
             if (provider === defaultProvider) {

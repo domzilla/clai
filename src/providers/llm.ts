@@ -14,7 +14,7 @@ import type { Provider, RiskLevel } from '../config/schema.js';
 import { RISK_LEVELS } from '../config/schema.js';
 import type { SystemInfo } from '../system/detector.js';
 import { configManager } from '../config/manager.js';
-import { PROVIDER_ENV_VAR_NAMES } from '../config/defaults.js';
+import { DEFAULT_MODELS, PROVIDER_ENV_VAR_NAMES } from '../config/defaults.js';
 import { promptBuilder } from '../prompts/builder.js';
 import { wrapError } from '../utils/errors.js';
 
@@ -67,7 +67,7 @@ export class LLMProvider {
         options: GenerateOptions = {},
     ): Promise<GeneratedCommand[]> {
         const provider = options.provider || configManager.get('defaultProvider');
-        const model = options.model || configManager.get('defaultModel');
+        const model = options.model || configManager.getModel(provider) || DEFAULT_MODELS[provider];
         const count = options.count || configManager.getPreference('commandCount');
 
         const apiKey = configManager.getApiKey(provider);

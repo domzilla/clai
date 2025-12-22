@@ -23,9 +23,9 @@ interface ModelManagerScreenProps {
     /** Configured providers to show tabs for. */
     configuredProviders: Provider[];
     /** Current default provider. */
-    currentProvider: Provider;
-    /** Current default model. */
-    currentModel: string;
+    defaultProvider: Provider;
+    /** Current models for each provider. */
+    providerModels: Record<Provider, string | undefined>;
     /** Callback when complete. */
     onResult: (result: ModelManagerResult | null) => void;
 }
@@ -39,11 +39,11 @@ type ViewState = 'tabs' | 'models';
  */
 function ModelManagerScreen({
     configuredProviders,
-    currentProvider,
-    currentModel,
+    defaultProvider,
+    providerModels,
     onResult,
 }: ModelManagerScreenProps): React.ReactElement {
-    const [selectedProvider, setSelectedProvider] = useState<Provider>(currentProvider);
+    const [selectedProvider, setSelectedProvider] = useState<Provider>(defaultProvider);
     const [view, setView] = useState<ViewState>(
         configuredProviders.length > 1 ? 'tabs' : 'models',
     );
@@ -88,7 +88,7 @@ function ModelManagerScreen({
                 <Box marginBottom={1}>
                     <Text color={theme.colors.hint}>
                         Provider: {PROVIDER_DISPLAY_NAMES[selectedProvider]}
-                        {selectedProvider === currentProvider && ' (current)'}
+                        {selectedProvider === defaultProvider && ' (default)'}
                     </Text>
                 </Box>
             )}
@@ -113,12 +113,10 @@ function ModelManagerScreen({
             {view === 'models' && (
                 <ModelSelector
                     provider={selectedProvider}
-                    currentModel={
-                        selectedProvider === currentProvider ? currentModel : undefined
-                    }
+                    currentModel={providerModels[selectedProvider]}
                     onSelect={handleModelSelect}
                     onCancel={handleCancel}
-                    message="Select your default model:"
+                    message={`Select model for ${PROVIDER_DISPLAY_NAMES[selectedProvider]}:`}
                 />
             )}
         </Box>
@@ -128,20 +126,20 @@ function ModelManagerScreen({
 /**
  * Runs the model manager screen.
  * @param configuredProviders - Providers with API keys configured.
- * @param currentProvider - Current default provider.
- * @param currentModel - Current default model.
+ * @param defaultProvider - Current default provider.
+ * @param providerModels - Current models for each provider.
  * @returns Selected provider and model, or null if cancelled.
  */
 export async function runModelManager(
     configuredProviders: Provider[],
-    currentProvider: Provider,
-    currentModel: string,
+    defaultProvider: Provider,
+    providerModels: Record<Provider, string | undefined>,
 ): Promise<ModelManagerResult | null> {
     return renderAndWait<ModelManagerResult>((context) => (
         <ModelManagerScreen
             configuredProviders={configuredProviders}
-            currentProvider={currentProvider}
-            currentModel={currentModel}
+            defaultProvider={defaultProvider}
+            providerModels={providerModels}
             onResult={(result) => {
                 if (result) {
                     context.resolve(result);

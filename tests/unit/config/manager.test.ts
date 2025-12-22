@@ -40,12 +40,30 @@ describe('ConfigManager', () => {
 
     describe('get/set', () => {
         it('should retrieve a set value', () => {
-            configManager.set('defaultModel', 'gpt-4o');
-            expect(configManager.get('defaultModel')).toBe('gpt-4o');
+            configManager.set('defaultProvider', 'anthropic');
+            expect(configManager.get('defaultProvider')).toBe('anthropic');
         });
 
         it('should return default value when not set', () => {
             expect(configManager.get('defaultProvider')).toBe('openai');
+        });
+    });
+
+    describe('setModel/getModel', () => {
+        it('should store and retrieve model for provider', () => {
+            configManager.setModel('openai', 'gpt-4o');
+            expect(configManager.getModel('openai')).toBe('gpt-4o');
+        });
+
+        it('should return undefined for unset provider model', () => {
+            expect(configManager.getModel('anthropic')).toBeUndefined();
+        });
+
+        it('should store different models for different providers', () => {
+            configManager.setModel('openai', 'gpt-4o');
+            configManager.setModel('anthropic', 'claude-3-opus');
+            expect(configManager.getModel('openai')).toBe('gpt-4o');
+            expect(configManager.getModel('anthropic')).toBe('claude-3-opus');
         });
     });
 
@@ -106,13 +124,13 @@ describe('ConfigManager', () => {
             const resetManager = new ConfigManager(tempDir);
 
             resetManager.set('defaultProvider', 'anthropic');
-            resetManager.set('defaultModel', 'claude-3-opus');
+            resetManager.setModel('anthropic', 'claude-3-opus');
             resetManager.setPreference('commandCount', 10);
 
             resetManager.reset();
 
             expect(resetManager.get('defaultProvider')).toBe('openai');
-            expect(resetManager.get('defaultModel')).toBe('gpt-4o-mini');
+            expect(resetManager.getModel('anthropic')).toBeUndefined();
             expect(resetManager.getPreference('commandCount')).toBe(3);
         });
     });
@@ -120,11 +138,13 @@ describe('ConfigManager', () => {
     describe('getAll', () => {
         it('should return complete configuration', () => {
             configManager.set('defaultProvider', 'gemini');
+            configManager.setModel('gemini', 'gemini-1.5-pro');
 
             const all = configManager.getAll();
 
             expect(all.defaultProvider).toBe('gemini');
-            expect(all).toHaveProperty('defaultModel');
+            expect(all).toHaveProperty('models');
+            expect(all.models.gemini).toBe('gemini-1.5-pro');
             expect(all).toHaveProperty('apiKeys');
             expect(all).toHaveProperty('preferences');
         });
@@ -139,13 +159,13 @@ describe('ConfigManager', () => {
 
     describe('persistence', () => {
         it('should persist configuration across instances', () => {
-            configManager.set('defaultModel', 'test-model');
+            configManager.setModel('openai', 'gpt-4o');
             configManager.setApiKey('openai', 'test-key');
 
             // Create a new instance
             const newManager = new ConfigManager(tempDir);
 
-            expect(newManager.get('defaultModel')).toBe('test-model');
+            expect(newManager.getModel('openai')).toBe('gpt-4o');
             expect(newManager.getApiKey('openai')).toBe('test-key');
         });
     });

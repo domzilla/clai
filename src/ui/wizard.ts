@@ -125,8 +125,8 @@ export class SetupWizard {
 
         // Save configuration
         this.config.set('defaultProvider', result.provider!);
-        this.config.set('defaultModel', result.model!);
         this.config.setApiKey(result.provider!, result.apiKey!);
+        this.config.setModel(result.provider!, result.model!);
         this.config.setPreference('commandCount', result.commandCount ?? 3);
 
         console.log(colors.success('\n  Configuration saved successfully!'));

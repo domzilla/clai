@@ -19,6 +19,14 @@ export interface ApiKeys {
     groq?: string;
 }
 
+/** Default models stored per provider. */
+export interface ProviderModels {
+    openai?: string;
+    anthropic?: string;
+    gemini?: string;
+    groq?: string;
+}
+
 /** User preferences for command generation. */
 export interface Preferences {
     /** Number of command options to generate (1-10). */
@@ -31,10 +39,10 @@ export interface Preferences {
 export interface ClaiConfig {
     /** Default AI provider to use. */
     defaultProvider: Provider;
-    /** Default model for the selected provider. */
-    defaultModel: string;
     /** API keys for each provider. */
     apiKeys: ApiKeys;
+    /** Default models for each provider. */
+    models: ProviderModels;
     /** User preferences. */
     preferences: Preferences;
 }

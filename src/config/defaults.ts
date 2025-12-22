@@ -13,8 +13,8 @@ import type { ClaiConfig, Provider } from './schema.js';
 /** Default configuration values for new installations. */
 export const DEFAULT_CONFIG: ClaiConfig = {
     defaultProvider: 'openai',
-    defaultModel: 'gpt-4o-mini',
     apiKeys: {},
+    models: {},
     preferences: {
         commandCount: 3,
         showExplanations: true,
@@ -65,8 +65,8 @@ export const PROVIDER_ENV_VAR_NAMES: Record<Provider, string> = {
 export function createDefaultConfig(): ClaiConfig {
     return {
         defaultProvider: DEFAULT_CONFIG.defaultProvider,
-        defaultModel: DEFAULT_CONFIG.defaultModel,
         apiKeys: { ...DEFAULT_CONFIG.apiKeys },
+        models: { ...DEFAULT_CONFIG.models },
         preferences: { ...DEFAULT_CONFIG.preferences },
     };
 }
