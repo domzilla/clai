@@ -12,7 +12,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
-import TOML from '@iarna/toml';
+import { parse as parseToml, stringify as stringifyToml } from 'smol-toml';
 
 import type { ClaiConfig, Provider, Preferences } from './schema.js';
 import {
@@ -65,7 +65,7 @@ export class ConfigManager {
 
         try {
             const content = readFileSync(this.configPath, 'utf-8');
-            const parsed = TOML.parse(content) as Partial<ClaiConfig>;
+            const parsed = parseToml(content) as Partial<ClaiConfig>;
 
             // Merge with defaults to ensure all fields exist
             this.config = {
@@ -86,7 +86,7 @@ export class ConfigManager {
         this.ensureConfigDir();
         writeFileSync(
             this.configPath,
-            TOML.stringify(this.config as unknown as TOML.JsonMap),
+            stringifyToml(this.config as unknown as Record<string, unknown>),
             'utf-8',
         );
     }
