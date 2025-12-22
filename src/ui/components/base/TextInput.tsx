@@ -111,7 +111,7 @@ export function TextInput({
         <Box flexDirection="column">
             {message && (
                 <Box marginBottom={1}>
-                    <Text color={palette.text}>{message}</Text>
+                    <Text>{message}</Text>
                 </Box>
             )}
             <Box>

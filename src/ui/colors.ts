@@ -29,8 +29,6 @@ export const palette = {
 
     // === Text colors ===
 
-    /** Regular display text. */
-    text: 'white',
     /** Secondary text (labels, descriptions, less prominent info). */
     secondaryText: 'white',
     /** Help hints (keyboard shortcuts, footer help, inline tips like "(current)"). */
@@ -76,8 +74,8 @@ export const colors = {
 
     // === Text styles ===
 
-    /** Primary text, standard output. */
-    primary: (text: string) => chalk[palette.text](text),
+    /** Primary text, standard output (terminal default). */
+    primary: (text: string) => text,
 
     /** Secondary text, labels, descriptions. */
     secondary: (text: string) => chalk[palette.secondaryText](text),
@@ -88,8 +86,8 @@ export const colors = {
     /** Emphasized/important values. */
     value: (text: string) => chalk.bold(text),
 
-    /** Labels before values. */
-    label: (text: string) => chalk[palette.text](text),
+    /** Labels before values (terminal default). */
+    label: (text: string) => text,
 
     /** Commands user should run. */
     command: (text: string) => chalk[palette.command](text),

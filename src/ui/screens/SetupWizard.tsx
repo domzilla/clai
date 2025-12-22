@@ -164,7 +164,7 @@ function SetupWizardScreen({
             </Box>
 
             <Box marginBottom={1}>
-                <Text color={palette.text}>
+                <Text>
                     Let's set up your configuration.
                 </Text>
             </Box>
@@ -202,7 +202,7 @@ function SetupWizardScreen({
                 {currentStep === 'provider' && (
                     <Box flexDirection="column">
                         <Box marginBottom={1}>
-                            <Text color={palette.text}>Select your preferred AI provider:</Text>
+                            <Text>Select your preferred AI provider:</Text>
                         </Box>
                         {PROVIDERS.map((p, idx) => {
                             const isSelected = idx === providerIndex;
@@ -234,7 +234,7 @@ function SetupWizardScreen({
                 {currentStep === 'model' && provider && (
                     <Box flexDirection="column">
                         <Box marginBottom={1}>
-                            <Text color={palette.text}>Select your default model:</Text>
+                            <Text>Select your default model:</Text>
                         </Box>
                         {models.map((m, idx) => {
                             const isSelected = idx === modelIndex;
@@ -258,7 +258,7 @@ function SetupWizardScreen({
                 {currentStep === 'count' && (
                     <Box flexDirection="column">
                         <Box marginBottom={1}>
-                            <Text color={palette.text}>How many command options should be generated?</Text>
+                            <Text>How many command options should be generated?</Text>
                         </Box>
                         <Box>
                             <Text color={palette.active}>❯ </Text>

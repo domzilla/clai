@@ -54,7 +54,7 @@ export function Select<T>({
         <Box flexDirection="column">
             {message && (
                 <Box marginBottom={1}>
-                    <Text color={palette.text}>{message}</Text>
+                    <Text>{message}</Text>
                 </Box>
             )}
             {items.map((item, index) => {

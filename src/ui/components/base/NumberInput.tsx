@@ -135,7 +135,7 @@ export function NumberInput({
         <Box flexDirection="column">
             {message && (
                 <Box marginBottom={1}>
-                    <Text color={palette.text}>
+                    <Text>
                         {message}
                         <Text color={palette.hint}>{rangeHint}</Text>
                     </Text>

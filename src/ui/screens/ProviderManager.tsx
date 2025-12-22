@@ -242,7 +242,7 @@ function ProviderManagerScreen({
 
                 {/* Show configured providers status */}
                 <Box flexDirection="column" marginBottom={1}>
-                    <Text color={palette.text}>Configured:</Text>
+                    <Text>Configured:</Text>
                     {configuredProviders.length === 0 ? (
                         <Text color={palette.secondaryText}>  (none)</Text>
                     ) : (
@@ -283,7 +283,7 @@ function ProviderManagerScreen({
 
                 {/* Action hint */}
                 <Box marginBottom={1}>
-                    <Text color={palette.text}>{getActionHint()}</Text>
+                    <Text>{getActionHint()}</Text>
                 </Box>
 
                 {/* Provider list */}
@@ -361,7 +361,7 @@ function ProviderManagerScreen({
                         </Text>
                     </Box>
                     <Box marginBottom={1}>
-                        <Text color={palette.text}>Select new default provider:</Text>
+                        <Text>Select new default provider:</Text>
                     </Box>
                     <NewDefaultProviderSelector
                         providers={getRemainingProviders()}
