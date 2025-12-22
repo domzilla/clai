@@ -5,18 +5,17 @@
  * @created 2025-12-22
  * @license MIT
  *
- * @fileoverview Model manager screen with provider tabs.
+ * @fileoverview Model manager screen with provider tabs and model selection.
  */
 
 import React, { useState } from 'react';
-import { Box, Text } from 'ink';
-import { Tabs } from '../components/base/Tabs.js';
-import { ModelSelector } from '../components/domain/ModelSelector.js';
+import { Box, Text, useInput } from 'ink';
 import { renderAndWait } from '../utils/render.js';
 import { theme, colors } from '../utils/theme.js';
 import type { Provider } from '../../config/schema.js';
 import { PROVIDER_DISPLAY_NAMES } from '../../config/schema.js';
-import type { ModelManagerResult, TabItem } from '../utils/types.js';
+import { PROVIDER_MODELS } from '../../config/defaults.js';
+import type { ModelManagerResult } from '../utils/types.js';
 
 /** Props for the ModelManager screen. */
 interface ModelManagerScreenProps {
@@ -30,12 +29,10 @@ interface ModelManagerScreenProps {
     onResult: (result: ModelManagerResult | null) => void;
 }
 
-/** View state for the screen. */
-type ViewState = 'tabs' | 'models';
-
 /**
  * Model manager screen component.
- * Shows provider tabs when multiple are configured, then model selection.
+ * Shows provider tabs and model list in a combined view.
+ * Use ←/→ to switch providers, ↑/↓ to select models.
  */
 function ModelManagerScreen({
     configuredProviders,
@@ -43,82 +40,126 @@ function ModelManagerScreen({
     providerModels,
     onResult,
 }: ModelManagerScreenProps): React.ReactElement {
-    const [selectedProvider, setSelectedProvider] = useState<Provider>(defaultProvider);
-    const [view, setView] = useState<ViewState>(
-        configuredProviders.length > 1 ? 'tabs' : 'models',
+    const [providerIndex, setProviderIndex] = useState<number>(() =>
+        Math.max(0, configuredProviders.indexOf(defaultProvider)),
     );
+    const selectedProvider = configuredProviders[providerIndex] ?? defaultProvider;
+    const models = PROVIDER_MODELS[selectedProvider];
+    const currentModel = providerModels[selectedProvider];
 
-    const tabs: TabItem<Provider>[] = configuredProviders.map((provider) => ({
-        label: PROVIDER_DISPLAY_NAMES[provider],
-        value: provider,
-    }));
+    const [modelIndex, setModelIndex] = useState<number>(() => {
+        const idx = models.indexOf(currentModel ?? '');
+        return idx >= 0 ? idx : 0;
+    });
 
-    const handleProviderChange = (provider: Provider): void => {
-        setSelectedProvider(provider);
-    };
-
-    const handleProviderConfirm = (): void => {
-        setView('models');
-    };
-
-    const handleModelSelect = (model: string): void => {
-        onResult({
-            provider: selectedProvider,
-            model,
-        });
-    };
-
-    const handleCancel = (): void => {
-        if (view === 'models' && configuredProviders.length > 1) {
-            setView('tabs');
-        } else {
-            onResult(null);
+    // Reset model index when provider changes
+    const handleProviderChange = (newIndex: number): void => {
+        setProviderIndex(newIndex);
+        const newProvider = configuredProviders[newIndex];
+        if (newProvider) {
+            const newModels = PROVIDER_MODELS[newProvider];
+            const newCurrentModel = providerModels[newProvider];
+            const idx = newModels.indexOf(newCurrentModel ?? '');
+            setModelIndex(idx >= 0 ? idx : 0);
         }
     };
+
+    useInput((_input, key) => {
+        if (key.escape) {
+            onResult(null);
+            return;
+        }
+
+        if (key.return) {
+            const model = models[modelIndex];
+            if (model) {
+                onResult({
+                    provider: selectedProvider,
+                    model,
+                });
+            }
+            return;
+        }
+
+        // Left/Right: switch provider
+        if (key.leftArrow && configuredProviders.length > 1) {
+            const newIndex = (providerIndex - 1 + configuredProviders.length) % configuredProviders.length;
+            handleProviderChange(newIndex);
+        } else if (key.rightArrow && configuredProviders.length > 1) {
+            const newIndex = (providerIndex + 1) % configuredProviders.length;
+            handleProviderChange(newIndex);
+        }
+
+        // Up/Down: select model
+        if (key.upArrow) {
+            setModelIndex((prev: number) => (prev - 1 + models.length) % models.length);
+        } else if (key.downArrow) {
+            setModelIndex((prev: number) => (prev + 1) % models.length);
+        }
+    });
 
     return (
         <Box flexDirection="column">
             <Box marginBottom={1}>
-                <Text bold color={theme.colors.active}>
-                    {colors.header('Select Model')}
-                </Text>
+                <Text bold>{colors.header('Select Model')}</Text>
             </Box>
 
+            {/* Provider tabs */}
             {configuredProviders.length > 1 && (
                 <Box marginBottom={1}>
-                    <Text color={theme.colors.hint}>
-                        Provider: {PROVIDER_DISPLAY_NAMES[selectedProvider]}
-                        {selectedProvider === defaultProvider && ' (default)'}
-                    </Text>
+                    <Text color={theme.colors.hint}>Provider: </Text>
+                    {configuredProviders.map((provider: Provider, idx: number) => {
+                        const isSelected = idx === providerIndex;
+                        const isDefault = provider === defaultProvider;
+                        return (
+                            <Text key={provider}>
+                                {idx > 0 && <Text color={theme.colors.hint}> | </Text>}
+                                <Text
+                                    bold={isSelected}
+                                    color={isSelected ? theme.colors.active : theme.colors.hint}
+                                >
+                                    {isSelected ? '[' : ' '}
+                                    {PROVIDER_DISPLAY_NAMES[provider]}
+                                    {isDefault ? '*' : ''}
+                                    {isSelected ? ']' : ' '}
+                                </Text>
+                            </Text>
+                        );
+                    })}
                 </Box>
             )}
 
-            {view === 'tabs' && (
-                <Box flexDirection="column">
-                    <Box marginBottom={1}>
-                        <Text color={theme.colors.hint}>
-                            Use ←/→ to switch provider, Enter to select
-                        </Text>
-                    </Box>
-                    <Tabs
-                        tabs={tabs}
-                        selected={selectedProvider}
-                        onChange={handleProviderChange}
-                        onConfirm={handleProviderConfirm}
-                        onCancel={handleCancel}
-                    />
-                </Box>
-            )}
+            {/* Model list */}
+            <Box flexDirection="column">
+                {models.map((model: string, idx: number) => {
+                    const isSelected = idx === modelIndex;
+                    const isCurrent = model === currentModel;
+                    return (
+                        <Box key={model}>
+                            <Text color={isSelected ? theme.colors.active : theme.colors.inactive}>
+                                {isSelected ? '❯ ' : '  '}
+                            </Text>
+                            <Text
+                                bold={isSelected}
+                                color={isSelected ? theme.colors.active : theme.colors.inactive}
+                            >
+                                {model}
+                            </Text>
+                            {isCurrent && (
+                                <Text color={theme.colors.hint}> (current)</Text>
+                            )}
+                        </Box>
+                    );
+                })}
+            </Box>
 
-            {view === 'models' && (
-                <ModelSelector
-                    provider={selectedProvider}
-                    currentModel={providerModels[selectedProvider]}
-                    onSelect={handleModelSelect}
-                    onCancel={handleCancel}
-                    message={`Select model for ${PROVIDER_DISPLAY_NAMES[selectedProvider]}:`}
-                />
-            )}
+            {/* Help text */}
+            <Box marginTop={1}>
+                <Text color={theme.colors.hint}>
+                    {configuredProviders.length > 1 ? '←/→ provider · ' : ''}
+                    ↑/↓ select · Enter confirm · Esc cancel
+                </Text>
+            </Box>
         </Box>
     );
 }

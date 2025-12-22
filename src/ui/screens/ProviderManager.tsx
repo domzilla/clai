@@ -5,20 +5,18 @@
  * @created 2025-12-22
  * @license MIT
  *
- * @fileoverview Provider manager screen with action tabs.
+ * @fileoverview Provider manager screen with combined action tabs and provider selection.
  */
 
 import React, { useState } from 'react';
-import { Box, Text } from 'ink';
-import { Tabs } from '../components/base/Tabs.js';
-import { ProviderSelector } from '../components/domain/ProviderSelector.js';
+import { Box, Text, useInput } from 'ink';
 import { ModelSelector } from '../components/domain/ModelSelector.js';
 import { ApiKeyInput } from '../components/domain/ApiKeyInput.js';
 import { renderAndWait } from '../utils/render.js';
 import { theme, colors } from '../utils/theme.js';
 import type { Provider } from '../../config/schema.js';
 import { PROVIDERS, PROVIDER_DISPLAY_NAMES } from '../../config/schema.js';
-import type { ProviderManagerResult, TabItem } from '../utils/types.js';
+import type { ProviderManagerResult } from '../utils/types.js';
 
 /** Props for the ProviderManager screen. */
 interface ProviderManagerScreenProps {
@@ -34,11 +32,18 @@ interface ProviderManagerScreenProps {
 type Action = 'add' | 'update' | 'remove' | 'default';
 
 /** View states for the screen. */
-type ViewState = 'tabs' | 'provider' | 'apiKey' | 'model' | 'newDefaultProvider' | 'newDefaultModel';
+type ViewState = 'main' | 'apiKey' | 'model' | 'newDefaultProvider' | 'newDefaultModel';
+
+/** Action configuration. */
+interface ActionConfig {
+    label: string;
+    value: Action;
+}
 
 /**
  * Provider manager screen component.
- * Shows action tabs and handles add/update/remove/default flows.
+ * Shows action tabs and provider list in a combined view.
+ * Use ←/→ to switch actions, ↑/↓ to select providers.
  */
 function ProviderManagerScreen({
     configuredProviders,
@@ -49,83 +54,115 @@ function ProviderManagerScreen({
         (p) => !configuredProviders.includes(p),
     );
 
-    const [action, setAction] = useState<Action>(
-        unconfiguredProviders.length > 0 ? 'add' : 'update',
-    );
-    const [view, setView] = useState<ViewState>('tabs');
-    const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
-    const [apiKey, setApiKey] = useState<string | null>(null);
-    const [newDefaultProvider, setNewDefaultProvider] = useState<Provider | null>(null);
-
-    // Build available tabs based on state
-    const tabs: TabItem<Action>[] = [];
-
+    // Build available actions based on state
+    const actions: ActionConfig[] = [];
     if (unconfiguredProviders.length > 0) {
-        tabs.push({ label: 'Add', value: 'add' });
+        actions.push({ label: 'Add', value: 'add' });
     }
     if (configuredProviders.length > 0) {
-        tabs.push({ label: 'Update', value: 'update' });
-        tabs.push({ label: 'Remove', value: 'remove' });
+        actions.push({ label: 'Update', value: 'update' });
+        actions.push({ label: 'Remove', value: 'remove' });
         if (configuredProviders.length > 1) {
-            tabs.push({ label: 'Set Default', value: 'default' });
+            actions.push({ label: 'Set Default', value: 'default' });
         }
     }
 
-    const handleActionChange = (newAction: Action): void => {
-        setAction(newAction);
-        setSelectedProvider(null);
-        setApiKey(null);
-        setNewDefaultProvider(null);
+    const [actionIndex, setActionIndex] = useState<number>(0);
+    const selectedAction = actions[actionIndex]?.value ?? 'add';
+
+    // Get providers list based on current action
+    const getProvidersForAction = (action: Action): Provider[] => {
+        switch (action) {
+            case 'add':
+                return unconfiguredProviders;
+            case 'update':
+            case 'remove':
+                return configuredProviders;
+            case 'default':
+                return configuredProviders.filter((p) => p !== defaultProvider);
+        }
     };
 
-    const handleActionConfirm = (): void => {
-        setView('provider');
+    const providers = getProvidersForAction(selectedAction);
+
+    const [providerIndex, setProviderIndex] = useState<number>(0);
+    const [view, setView] = useState<ViewState>('main');
+    const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
+    const [apiKey, setApiKey] = useState<string | null>(null);
+    const [newDefaultProvider, setNewDefaultProvider] = useState<Provider | null>(null);
+    const [newDefaultProviderIndex, setNewDefaultProviderIndex] = useState<number>(0);
+
+    // Reset provider index when action changes
+    const handleActionChange = (newIndex: number): void => {
+        setActionIndex(newIndex);
+        setProviderIndex(0);
     };
 
-    const handleProviderSelect = (provider: Provider): void => {
-        setSelectedProvider(provider);
+    useInput((_input, key) => {
+        if (view !== 'main') return;
 
-        if (action === 'add' || action === 'update') {
-            setView('apiKey');
-        } else if (action === 'default') {
-            if (provider === defaultProvider) {
-                // Already default, go back
-                setView('tabs');
-            } else {
-                // Each provider has its own model, just switch default provider
+        if (key.escape) {
+            onResult({ action: 'cancel' });
+            return;
+        }
+
+        if (key.return) {
+            const provider = providers[providerIndex];
+            if (!provider) return;
+
+            setSelectedProvider(provider);
+
+            if (selectedAction === 'add' || selectedAction === 'update') {
+                setView('apiKey');
+            } else if (selectedAction === 'default') {
                 onResult({
                     action: 'default',
                     provider,
                 });
-            }
-        } else if (action === 'remove') {
-            if (provider === defaultProvider) {
-                // Removing the default provider - need to select new default
-                const remainingProviders = configuredProviders.filter((p) => p !== provider);
-                if (remainingProviders.length > 0) {
-                    // Show new default selection
-                    setView('newDefaultProvider');
+            } else if (selectedAction === 'remove') {
+                if (provider === defaultProvider) {
+                    // Removing the default provider - need to select new default
+                    const remainingProviders = configuredProviders.filter((p) => p !== provider);
+                    if (remainingProviders.length > 0) {
+                        setView('newDefaultProvider');
+                    } else {
+                        // No other providers
+                        onResult({
+                            action: 'remove',
+                            provider,
+                        });
+                    }
                 } else {
-                    // No other providers - proceed with remove (will leave config empty)
                     onResult({
                         action: 'remove',
                         provider,
                     });
                 }
-            } else {
-                // Not the default, just remove
-                onResult({
-                    action: 'remove',
-                    provider,
-                });
             }
+            return;
         }
-    };
+
+        // Left/Right: switch action
+        if (key.leftArrow && actions.length > 1) {
+            const newIndex = (actionIndex - 1 + actions.length) % actions.length;
+            handleActionChange(newIndex);
+        } else if (key.rightArrow && actions.length > 1) {
+            const newIndex = (actionIndex + 1) % actions.length;
+            handleActionChange(newIndex);
+        }
+
+        // Up/Down: select provider
+        if (key.upArrow && providers.length > 0) {
+            setProviderIndex((prev: number) => (prev - 1 + providers.length) % providers.length);
+        } else if (key.downArrow && providers.length > 0) {
+            setProviderIndex((prev: number) => (prev + 1) % providers.length);
+        }
+    });
 
     const handleApiKeySubmit = (key: string): void => {
         setApiKey(key);
 
-        if (action === 'add') {
+        if (selectedAction === 'add') {
             setView('model');
         } else {
             // Update - done after API key
@@ -139,7 +176,7 @@ function ProviderManagerScreen({
 
     const handleModelSelect = (model: string): void => {
         onResult({
-            action: action as 'add' | 'default',
+            action: 'add',
             provider: selectedProvider!,
             apiKey: apiKey ?? undefined,
             model,
@@ -160,112 +197,145 @@ function ProviderManagerScreen({
         });
     };
 
-    const handleSkipNewDefault = (): void => {
-        // Remove the provider without setting a new default
-        onResult({
-            action: 'remove',
-            provider: selectedProvider!,
-        });
-    };
-
     const handleCancel = (): void => {
-        if (view === 'tabs') {
-            onResult({ action: 'cancel' });
-        } else if (view === 'model' && action === 'add') {
+        if (view === 'model' && selectedAction === 'add') {
             setView('apiKey');
         } else if (view === 'apiKey') {
-            setView('provider');
+            setView('main');
+            setSelectedProvider(null);
+            setApiKey(null);
         } else if (view === 'newDefaultModel') {
             setView('newDefaultProvider');
         } else if (view === 'newDefaultProvider') {
-            setView('provider');
+            setView('main');
+            setSelectedProvider(null);
         } else {
-            setView('tabs');
+            onResult({ action: 'cancel' });
         }
     };
 
-    // Get providers list based on current action
-    const getProvidersForAction = (): Provider[] => {
-        switch (action) {
-            case 'add':
-                return unconfiguredProviders;
-            case 'update':
-            case 'remove':
-            case 'default':
-                return configuredProviders;
-        }
-    };
-
-    // Get remaining providers for new default selection
+    // Get remaining providers for new default selection (excluding the one being removed)
     const getRemainingProviders = (): Provider[] => {
         return configuredProviders.filter((p) => p !== selectedProvider);
     };
 
-    // Get message for current action
-    const getActionMessage = (): string => {
-        switch (action) {
+    // Get action hint message
+    const getActionHint = (): string => {
+        switch (selectedAction) {
             case 'add':
-                return 'Select a provider to add:';
+                return 'Add a new AI provider';
             case 'update':
-                return 'Select a provider to update:';
+                return 'Update API key for a provider';
             case 'remove':
-                return 'Select a provider to remove:';
+                return 'Remove a configured provider';
             case 'default':
-                return `Set default provider (current: ${PROVIDER_DISPLAY_NAMES[defaultProvider]}):`;
+                return 'Change the default provider';
         }
     };
 
+    if (view === 'main') {
+        return (
+            <Box flexDirection="column">
+                <Box marginBottom={1}>
+                    <Text bold>{colors.header('Manage Providers')}</Text>
+                </Box>
+
+                {/* Show configured providers status */}
+                <Box flexDirection="column" marginBottom={1}>
+                    <Text color={theme.colors.hint}>Configured:</Text>
+                    {configuredProviders.length === 0 ? (
+                        <Text color={theme.colors.hint}>  (none)</Text>
+                    ) : (
+                        <Text color={theme.colors.hint}>
+                            {'  '}
+                            {configuredProviders.map((p, idx) => (
+                                <Text key={p}>
+                                    {idx > 0 && ', '}
+                                    {PROVIDER_DISPLAY_NAMES[p]}
+                                    {p === defaultProvider && '*'}
+                                </Text>
+                            ))}
+                        </Text>
+                    )}
+                </Box>
+
+                {/* Action tabs */}
+                {actions.length > 1 && (
+                    <Box marginBottom={1}>
+                        <Text color={theme.colors.hint}>Action: </Text>
+                        {actions.map((action, idx) => {
+                            const isSelected = idx === actionIndex;
+                            return (
+                                <Text key={action.value}>
+                                    {idx > 0 && <Text color={theme.colors.hint}> | </Text>}
+                                    <Text
+                                        bold={isSelected}
+                                        color={isSelected ? theme.colors.active : theme.colors.hint}
+                                    >
+                                        {isSelected ? '[' : ' '}
+                                        {action.label}
+                                        {isSelected ? ']' : ' '}
+                                    </Text>
+                                </Text>
+                            );
+                        })}
+                    </Box>
+                )}
+
+                {/* Action hint */}
+                <Box marginBottom={1}>
+                    <Text color={theme.colors.hint}>{getActionHint()}</Text>
+                </Box>
+
+                {/* Provider list */}
+                <Box flexDirection="column">
+                    {providers.length === 0 ? (
+                        <Text color={theme.colors.hint}>
+                            {selectedAction === 'add'
+                                ? '  All providers configured'
+                                : '  No providers to show'}
+                        </Text>
+                    ) : (
+                        providers.map((provider, idx) => {
+                            const isSelected = idx === providerIndex;
+                            const isDefault = provider === defaultProvider;
+                            return (
+                                <Box key={provider}>
+                                    <Text color={isSelected ? theme.colors.active : theme.colors.inactive}>
+                                        {isSelected ? '❯ ' : '  '}
+                                    </Text>
+                                    <Text
+                                        bold={isSelected}
+                                        color={isSelected ? theme.colors.active : theme.colors.inactive}
+                                    >
+                                        {PROVIDER_DISPLAY_NAMES[provider]}
+                                    </Text>
+                                    {isDefault && selectedAction !== 'default' && (
+                                        <Text color={theme.colors.hint}> (default)</Text>
+                                    )}
+                                </Box>
+                            );
+                        })
+                    )}
+                </Box>
+
+                {/* Help text */}
+                <Box marginTop={1}>
+                    <Text color={theme.colors.hint}>
+                        {actions.length > 1 ? '←/→ action · ' : ''}
+                        ↑/↓ select · Enter confirm · Esc cancel
+                    </Text>
+                </Box>
+            </Box>
+        );
+    }
+
+    // Subsequent views for multi-step flows
     return (
         <Box flexDirection="column">
             <Box marginBottom={1}>
-                <Text>{colors.header('Manage Providers')}</Text>
+                <Text bold>{colors.header('Manage Providers')}</Text>
             </Box>
-
-            {/* Show configured providers status */}
-            <Box flexDirection="column" marginBottom={1}>
-                <Text color={theme.colors.hint}>Configured providers:</Text>
-                {configuredProviders.length === 0 ? (
-                    <Text color={theme.colors.hint}>  (none)</Text>
-                ) : (
-                    configuredProviders.map((p) => (
-                        <Text key={p}>
-                            {'  '}
-                            <Text color={theme.colors.success}>●</Text>{' '}
-                            {PROVIDER_DISPLAY_NAMES[p]}
-                            {p === defaultProvider && (
-                                <Text color={theme.colors.hint}> (default)</Text>
-                            )}
-                        </Text>
-                    ))
-                )}
-            </Box>
-
-            {view === 'tabs' && tabs.length > 0 && (
-                <Box flexDirection="column">
-                    <Box marginBottom={1}>
-                        <Text color={theme.colors.hint}>
-                            Use ←/→ to select action, Enter to confirm, Escape to cancel
-                        </Text>
-                    </Box>
-                    <Tabs
-                        tabs={tabs}
-                        selected={action}
-                        onChange={handleActionChange}
-                        onConfirm={handleActionConfirm}
-                        onCancel={handleCancel}
-                    />
-                </Box>
-            )}
-
-            {view === 'provider' && (
-                <ProviderSelector
-                    providers={getProvidersForAction()}
-                    message={getActionMessage()}
-                    onSelect={handleProviderSelect}
-                    onCancel={handleCancel}
-                    showCancel={false}
-                />
-            )}
 
             {view === 'apiKey' && selectedProvider && (
                 <ApiKeyInput
@@ -291,14 +361,21 @@ function ProviderManagerScreen({
                             {PROVIDER_DISPLAY_NAMES[selectedProvider]} is your default provider.
                         </Text>
                     </Box>
-                    <ProviderSelector
+                    <Box marginBottom={1}>
+                        <Text color={theme.colors.hint}>Select new default provider:</Text>
+                    </Box>
+                    <NewDefaultProviderSelector
                         providers={getRemainingProviders()}
-                        message="Select new default provider:"
+                        selectedIndex={newDefaultProviderIndex}
+                        onIndexChange={setNewDefaultProviderIndex}
                         onSelect={handleNewDefaultProviderSelect}
                         onCancel={handleCancel}
-                        onSkip={handleSkipNewDefault}
-                        showCancel={false}
-                        showSkip={true}
+                        onSkip={() => {
+                            onResult({
+                                action: 'remove',
+                                provider: selectedProvider,
+                            });
+                        }}
                     />
                 </Box>
             )}
@@ -311,6 +388,80 @@ function ProviderManagerScreen({
                     onCancel={handleCancel}
                 />
             )}
+        </Box>
+    );
+}
+
+/** Props for NewDefaultProviderSelector. */
+interface NewDefaultProviderSelectorProps {
+    providers: Provider[];
+    selectedIndex: number;
+    onIndexChange: (index: number) => void;
+    onSelect: (provider: Provider) => void;
+    onCancel: () => void;
+    onSkip: () => void;
+}
+
+/**
+ * Simple provider selector for new default selection.
+ */
+function NewDefaultProviderSelector({
+    providers,
+    selectedIndex,
+    onIndexChange,
+    onSelect,
+    onCancel,
+    onSkip,
+}: NewDefaultProviderSelectorProps): React.ReactElement {
+    useInput((_input, key) => {
+        if (key.escape) {
+            onCancel();
+            return;
+        }
+
+        if (key.return) {
+            const provider = providers[selectedIndex];
+            if (provider) {
+                onSelect(provider);
+            }
+            return;
+        }
+
+        if (_input === 's' || _input === 'S') {
+            onSkip();
+            return;
+        }
+
+        if (key.upArrow) {
+            onIndexChange((selectedIndex - 1 + providers.length) % providers.length);
+        } else if (key.downArrow) {
+            onIndexChange((selectedIndex + 1) % providers.length);
+        }
+    });
+
+    return (
+        <Box flexDirection="column">
+            {providers.map((provider, idx) => {
+                const isSelected = idx === selectedIndex;
+                return (
+                    <Box key={provider}>
+                        <Text color={isSelected ? theme.colors.active : theme.colors.inactive}>
+                            {isSelected ? '❯ ' : '  '}
+                        </Text>
+                        <Text
+                            bold={isSelected}
+                            color={isSelected ? theme.colors.active : theme.colors.inactive}
+                        >
+                            {PROVIDER_DISPLAY_NAMES[provider]}
+                        </Text>
+                    </Box>
+                );
+            })}
+            <Box marginTop={1}>
+                <Text color={theme.colors.hint}>
+                    ↑/↓ select · Enter confirm · S skip · Esc cancel
+                </Text>
+            </Box>
         </Box>
     );
 }
