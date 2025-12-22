@@ -36,10 +36,13 @@ async function main(): Promise<void> {
             process.exit(0);
         }
 
-        // If user ran with a prompt, continue to execute it
-        if (args.length > 0) {
-            console.log('  Now running your command...\n');
+        // If user ran without arguments, exit after wizard
+        if (args.length === 0) {
+            process.exit(0);
         }
+
+        // Continue to execute the provided command
+        console.log('  Now running your command...\n');
     }
 
     program.parse(process.argv);
