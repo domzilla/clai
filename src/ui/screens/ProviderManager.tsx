@@ -242,7 +242,7 @@ function ProviderManagerScreen({
 
                 {/* Show configured providers status */}
                 <Box flexDirection="column" marginBottom={1}>
-                    <Text>Configured:</Text>
+                    <Text color={palette.secondaryText}>Configured:</Text>
                     {configuredProviders.length === 0 ? (
                         <Text color={palette.secondaryText}>  (none)</Text>
                     ) : (
