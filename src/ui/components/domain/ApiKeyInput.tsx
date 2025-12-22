@@ -11,7 +11,7 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import { PasswordInput } from '../base/PasswordInput.js';
-import { theme } from '../../utils/theme.js';
+import { palette } from '../../colors.js';
 import type { Provider } from '../../../config/schema.js';
 import { PROVIDER_DISPLAY_NAMES } from '../../../config/schema.js';
 import { PROVIDER_API_KEY_URLS } from '../../../config/defaults.js';
@@ -48,7 +48,7 @@ export function ApiKeyInput({
     return (
         <Box flexDirection="column">
             <Box marginBottom={1}>
-                <Text color={theme.colors.hint}>
+                <Text color={palette.secondaryText}>
                     Get your API key at: {apiKeyUrl}
                 </Text>
             </Box>

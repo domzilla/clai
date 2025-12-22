@@ -11,7 +11,7 @@
 import React, { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { renderAndWait } from '../utils/render.js';
-import { theme, colors } from '../utils/theme.js';
+import { palette, colors } from '../colors.js';
 import type { Provider } from '../../config/schema.js';
 import { PROVIDER_DISPLAY_NAMES } from '../../config/schema.js';
 import { PROVIDER_MODELS } from '../../config/defaults.js';
@@ -107,7 +107,7 @@ function ModelManagerScreen({
             {/* Provider tabs */}
             {configuredProviders.length > 1 && (
                 <Box marginBottom={1}>
-                    <Text color={theme.colors.hint}>Provider: </Text>
+                    <Text color={palette.secondaryText}>Provider: </Text>
                     {configuredProviders.map((provider: Provider, idx: number) => {
                         const isSelected = idx === providerIndex;
                         const isDefault = provider === defaultProvider;
@@ -116,8 +116,8 @@ function ModelManagerScreen({
                                 {idx > 0 && <Text> </Text>}
                                 <Text
                                     bold={isSelected}
-                                    color={isSelected ? theme.colors.activeText : theme.colors.hint}
-                                    {...(isSelected && { backgroundColor: theme.colors.active })}
+                                    color={isSelected ? palette.activeText : palette.secondaryText}
+                                    {...(isSelected && { backgroundColor: palette.active })}
                                 >
                                     {' '}{PROVIDER_DISPLAY_NAMES[provider]}{isDefault ? '*' : ''}{' '}
                                 </Text>
@@ -134,17 +134,17 @@ function ModelManagerScreen({
                     const isCurrent = model === currentModel;
                     return (
                         <Box key={model}>
-                            <Text color={isSelected ? theme.colors.active : theme.colors.inactive}>
+                            <Text color={isSelected ? palette.active : palette.control}>
                                 {isSelected ? '❯ ' : '  '}
                             </Text>
                             <Text
                                 bold={isSelected}
-                                color={isSelected ? theme.colors.active : theme.colors.inactive}
+                                color={isSelected ? palette.active : palette.control}
                             >
                                 {model}
                             </Text>
                             {isCurrent && (
-                                <Text color={theme.colors.hint}> (current)</Text>
+                                <Text color={palette.hint}> (current)</Text>
                             )}
                         </Box>
                     );
@@ -153,7 +153,7 @@ function ModelManagerScreen({
 
             {/* Help text */}
             <Box marginTop={1}>
-                <Text color={theme.colors.hint}>
+                <Text color={palette.hint}>
                     {configuredProviders.length > 1 ? '←/→ provider · ' : ''}
                     ↑/↓ select · Enter confirm · Esc cancel
                 </Text>

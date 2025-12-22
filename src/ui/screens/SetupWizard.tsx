@@ -12,7 +12,7 @@ import React, { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { ApiKeyInput } from '../components/domain/ApiKeyInput.js';
 import { renderAndWait } from '../utils/render.js';
-import { theme, colors } from '../utils/theme.js';
+import { palette, colors } from '../colors.js';
 import type { Provider } from '../../config/schema.js';
 import { PROVIDERS, PROVIDER_DISPLAY_NAMES } from '../../config/schema.js';
 import { PROVIDER_MODELS } from '../../config/defaults.js';
@@ -164,14 +164,14 @@ function SetupWizardScreen({
             </Box>
 
             <Box marginBottom={1}>
-                <Text color={theme.colors.hint}>
+                <Text color={palette.text}>
                     Let's set up your configuration.
                 </Text>
             </Box>
 
             {/* Step tabs */}
             <Box marginBottom={1}>
-                <Text color={theme.colors.hint}>Step: </Text>
+                <Text color={palette.secondaryText}>Step: </Text>
                 {STEPS.map((step, idx) => {
                     const isSelected = idx === stepIndex;
                     const isCompleted = idx < maxStepIndex || (idx === maxStepIndex && idx < stepIndex);
@@ -183,12 +183,12 @@ function SetupWizardScreen({
                                 bold={isSelected}
                                 color={
                                     isSelected
-                                        ? theme.colors.activeText
+                                        ? palette.activeText
                                         : isAccessible
-                                            ? theme.colors.hint
-                                            : theme.colors.disabled
+                                            ? palette.secondaryText
+                                            : palette.disabled
                                 }
-                                {...(isSelected && { backgroundColor: theme.colors.active })}
+                                {...(isSelected && { backgroundColor: palette.active })}
                             >
                                 {' '}{step.label}{isCompleted ? ' ✓' : ''}{' '}
                             </Text>
@@ -202,18 +202,18 @@ function SetupWizardScreen({
                 {currentStep === 'provider' && (
                     <Box flexDirection="column">
                         <Box marginBottom={1}>
-                            <Text color={theme.colors.hint}>Select your preferred AI provider:</Text>
+                            <Text color={palette.text}>Select your preferred AI provider:</Text>
                         </Box>
                         {PROVIDERS.map((p, idx) => {
                             const isSelected = idx === providerIndex;
                             return (
                                 <Box key={p}>
-                                    <Text color={isSelected ? theme.colors.active : theme.colors.inactive}>
+                                    <Text color={isSelected ? palette.active : palette.control}>
                                         {isSelected ? '❯ ' : '  '}
                                     </Text>
                                     <Text
                                         bold={isSelected}
-                                        color={isSelected ? theme.colors.active : theme.colors.inactive}
+                                        color={isSelected ? palette.active : palette.control}
                                     >
                                         {PROVIDER_DISPLAY_NAMES[p]}
                                     </Text>
@@ -234,18 +234,18 @@ function SetupWizardScreen({
                 {currentStep === 'model' && provider && (
                     <Box flexDirection="column">
                         <Box marginBottom={1}>
-                            <Text color={theme.colors.hint}>Select your default model:</Text>
+                            <Text color={palette.text}>Select your default model:</Text>
                         </Box>
                         {models.map((m, idx) => {
                             const isSelected = idx === modelIndex;
                             return (
                                 <Box key={m}>
-                                    <Text color={isSelected ? theme.colors.active : theme.colors.inactive}>
+                                    <Text color={isSelected ? palette.active : palette.control}>
                                         {isSelected ? '❯ ' : '  '}
                                     </Text>
                                     <Text
                                         bold={isSelected}
-                                        color={isSelected ? theme.colors.active : theme.colors.inactive}
+                                        color={isSelected ? palette.active : palette.control}
                                     >
                                         {m}
                                     </Text>
@@ -258,14 +258,14 @@ function SetupWizardScreen({
                 {currentStep === 'count' && (
                     <Box flexDirection="column">
                         <Box marginBottom={1}>
-                            <Text color={theme.colors.hint}>How many command options should be generated?</Text>
+                            <Text color={palette.text}>How many command options should be generated?</Text>
                         </Box>
                         <Box>
-                            <Text color={theme.colors.active}>❯ </Text>
-                            <Text bold color={theme.colors.active}>
+                            <Text color={palette.active}>❯ </Text>
+                            <Text bold color={palette.active}>
                                 {commandCount}
                             </Text>
-                            <Text color={theme.colors.hint}> (1-10)</Text>
+                            <Text color={palette.hint}> (1-10)</Text>
                         </Box>
                     </Box>
                 )}
@@ -273,7 +273,7 @@ function SetupWizardScreen({
 
             {/* Help text */}
             <Box marginTop={1}>
-                <Text color={theme.colors.hint}>
+                <Text color={palette.hint}>
                     {maxStepIndex > 0 ? '←/→ step · ' : ''}
                     {currentStep === 'apiKey'
                         ? 'Enter to submit · Esc back'

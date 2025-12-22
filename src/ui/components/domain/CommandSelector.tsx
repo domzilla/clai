@@ -11,7 +11,8 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import { useKeyboardNav } from '../../hooks/useKeyboardNav.js';
-import { theme, colors } from '../../utils/theme.js';
+import { theme } from '../../theme.js';
+import { palette, colors } from '../../colors.js';
 import type { GeneratedCommand } from '../../../providers/llm.js';
 import type { RiskLevel } from '../../../config/schema.js';
 
@@ -85,7 +86,7 @@ export function CommandSelector({
                 if (item.isCancel) {
                     return (
                         <Box key="cancel" marginTop={1}>
-                            <Text color={isSelected ? theme.colors.active : theme.colors.hint}>
+                            <Text color={isSelected ? palette.active : palette.control}>
                                 {isSelected ? theme.chars.pointer : ' '} Cancel
                             </Text>
                         </Box>
@@ -98,20 +99,20 @@ export function CommandSelector({
                 return (
                     <Box key={index} flexDirection="column" marginBottom={1}>
                         <Box>
-                            <Text color={isSelected ? theme.colors.active : theme.colors.inactive}>
+                            <Text color={isSelected ? palette.active : palette.control}>
                                 {isSelected ? theme.chars.pointer : ' '}{' '}
                             </Text>
-                            <Text color={isSelected ? theme.colors.active : theme.colors.inactive} bold={isSelected}>
+                            <Text color={isSelected ? palette.active : palette.control} bold={isSelected}>
                                 {command}
                             </Text>
                         </Box>
                         <Box marginLeft={3}>
                             <Text>{riskBadge} </Text>
-                            <Text color={theme.colors.hint}>{description}</Text>
+                            <Text color={palette.secondaryText}>{description}</Text>
                         </Box>
                         {verbose && isSelected && explanation && (
                             <Box marginLeft={3} marginTop={0}>
-                                <Text color={theme.colors.hint} dimColor>
+                                <Text color={palette.secondaryText} dimColor>
                                     {explanation}
                                 </Text>
                             </Box>

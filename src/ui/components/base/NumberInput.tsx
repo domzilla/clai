@@ -10,7 +10,8 @@
 
 import React, { useState, useCallback } from 'react';
 import { Box, Text, useInput } from 'ink';
-import { theme } from '../../utils/theme.js';
+import { theme } from '../../theme.js';
+import { palette } from '../../colors.js';
 
 /** Props for the NumberInput component. */
 export interface NumberInputProps {
@@ -134,24 +135,24 @@ export function NumberInput({
         <Box flexDirection="column">
             {message && (
                 <Box marginBottom={1}>
-                    <Text color={theme.colors.active}>
+                    <Text color={palette.text}>
                         {message}
-                        <Text color={theme.colors.hint}>{rangeHint}</Text>
+                        <Text color={palette.hint}>{rangeHint}</Text>
                     </Text>
                 </Box>
             )}
             <Box>
-                <Text color={theme.colors.active}>{theme.chars.pointer} </Text>
+                <Text color={palette.active}>{theme.chars.pointer} </Text>
                 <Text>{value}</Text>
                 <Text inverse> </Text>
             </Box>
             {error && (
                 <Box marginTop={1}>
-                    <Text color={theme.colors.error}>{error}</Text>
+                    <Text color={palette.error}>{error}</Text>
                 </Box>
             )}
             <Box marginTop={1}>
-                <Text color={theme.colors.hint} dimColor>
+                <Text color={palette.hint} dimColor>
                     Use ↑/↓ to adjust, Enter to confirm
                 </Text>
             </Box>

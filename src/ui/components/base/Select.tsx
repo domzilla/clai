@@ -11,7 +11,8 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import { useKeyboardNav } from '../../hooks/useKeyboardNav.js';
-import { theme } from '../../utils/theme.js';
+import { theme } from '../../theme.js';
+import { palette } from '../../colors.js';
 import type { SelectItem } from '../../utils/types.js';
 
 /** Props for the Select component. */
@@ -53,7 +54,7 @@ export function Select<T>({
         <Box flexDirection="column">
             {message && (
                 <Box marginBottom={1}>
-                    <Text color={theme.colors.active}>{message}</Text>
+                    <Text color={palette.text}>{message}</Text>
                 </Box>
             )}
             {items.map((item, index) => {
@@ -62,11 +63,11 @@ export function Select<T>({
 
                 let color: string;
                 if (isDisabled) {
-                    color = theme.colors.disabled;
+                    color = palette.disabled;
                 } else if (isSelected) {
-                    color = theme.colors.active;
+                    color = palette.active;
                 } else {
-                    color = theme.colors.inactive;
+                    color = palette.control;
                 }
 
                 return (
@@ -81,7 +82,7 @@ export function Select<T>({
                         </Box>
                         {item.description && isSelected && (
                             <Box marginLeft={3}>
-                                <Text color={theme.colors.hint} dimColor>
+                                <Text color={palette.secondaryText} dimColor>
                                     {item.description}
                                 </Text>
                             </Box>

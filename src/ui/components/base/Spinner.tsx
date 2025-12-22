@@ -10,7 +10,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Box, Text } from 'ink';
-import { theme } from '../../utils/theme.js';
+import { theme } from '../../theme.js';
+import { palette } from '../../colors.js';
 
 /** Props for the Spinner component. */
 export interface SpinnerProps {
@@ -35,9 +36,9 @@ export function Spinner({ text }: SpinnerProps): React.ReactElement {
 
     return (
         <Box>
-            <Text color={theme.colors.active}>{frames[frameIndex]}</Text>
+            <Text color={palette.active}>{frames[frameIndex]}</Text>
             {text && (
-                <Text color={theme.colors.hint}> {text}</Text>
+                <Text color={palette.secondaryText}> {text}</Text>
             )}
         </Box>
     );

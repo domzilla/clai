@@ -13,7 +13,7 @@ import { Box, Text, useInput } from 'ink';
 import { ModelSelector } from '../components/domain/ModelSelector.js';
 import { ApiKeyInput } from '../components/domain/ApiKeyInput.js';
 import { renderAndWait } from '../utils/render.js';
-import { theme, colors } from '../utils/theme.js';
+import { palette, colors } from '../colors.js';
 import type { Provider } from '../../config/schema.js';
 import { PROVIDERS, PROVIDER_DISPLAY_NAMES } from '../../config/schema.js';
 import type { ProviderManagerResult } from '../utils/types.js';
@@ -242,11 +242,11 @@ function ProviderManagerScreen({
 
                 {/* Show configured providers status */}
                 <Box flexDirection="column" marginBottom={1}>
-                    <Text color={theme.colors.hint}>Configured:</Text>
+                    <Text color={palette.text}>Configured:</Text>
                     {configuredProviders.length === 0 ? (
-                        <Text color={theme.colors.hint}>  (none)</Text>
+                        <Text color={palette.secondaryText}>  (none)</Text>
                     ) : (
-                        <Text color={theme.colors.hint}>
+                        <Text color={palette.secondaryText}>
                             {'  '}
                             {configuredProviders.map((p, idx) => (
                                 <Text key={p}>
@@ -262,7 +262,7 @@ function ProviderManagerScreen({
                 {/* Action tabs */}
                 {actions.length > 1 && (
                     <Box marginBottom={1}>
-                        <Text color={theme.colors.hint}>Action: </Text>
+                        <Text color={palette.secondaryText}>Action: </Text>
                         {actions.map((action, idx) => {
                             const isSelected = idx === actionIndex;
                             return (
@@ -270,8 +270,8 @@ function ProviderManagerScreen({
                                     {idx > 0 && <Text> </Text>}
                                     <Text
                                         bold={isSelected}
-                                        color={isSelected ? theme.colors.activeText : theme.colors.hint}
-                                        {...(isSelected && { backgroundColor: theme.colors.active })}
+                                        color={isSelected ? palette.activeText : palette.secondaryText}
+                                        {...(isSelected && { backgroundColor: palette.active })}
                                     >
                                         {' '}{action.label}{' '}
                                     </Text>
@@ -283,13 +283,13 @@ function ProviderManagerScreen({
 
                 {/* Action hint */}
                 <Box marginBottom={1}>
-                    <Text color={theme.colors.hint}>{getActionHint()}</Text>
+                    <Text color={palette.text}>{getActionHint()}</Text>
                 </Box>
 
                 {/* Provider list */}
                 <Box flexDirection="column">
                     {providers.length === 0 ? (
-                        <Text color={theme.colors.hint}>
+                        <Text color={palette.secondaryText}>
                             {selectedAction === 'add'
                                 ? '  All providers configured'
                                 : '  No providers to show'}
@@ -300,17 +300,17 @@ function ProviderManagerScreen({
                             const isDefault = provider === defaultProvider;
                             return (
                                 <Box key={provider}>
-                                    <Text color={isSelected ? theme.colors.active : theme.colors.inactive}>
+                                    <Text color={isSelected ? palette.active : palette.control}>
                                         {isSelected ? '❯ ' : '  '}
                                     </Text>
                                     <Text
                                         bold={isSelected}
-                                        color={isSelected ? theme.colors.active : theme.colors.inactive}
+                                        color={isSelected ? palette.active : palette.control}
                                     >
                                         {PROVIDER_DISPLAY_NAMES[provider]}
                                     </Text>
                                     {isDefault && selectedAction !== 'default' && (
-                                        <Text color={theme.colors.hint}> (default)</Text>
+                                        <Text color={palette.hint}> (default)</Text>
                                     )}
                                 </Box>
                             );
@@ -320,7 +320,7 @@ function ProviderManagerScreen({
 
                 {/* Help text */}
                 <Box marginTop={1}>
-                    <Text color={theme.colors.hint}>
+                    <Text color={palette.hint}>
                         {actions.length > 1 ? '←/→ action · ' : ''}
                         ↑/↓ select · Enter confirm · Esc cancel
                     </Text>
@@ -356,12 +356,12 @@ function ProviderManagerScreen({
             {view === 'newDefaultProvider' && selectedProvider && (
                 <Box flexDirection="column">
                     <Box marginBottom={1}>
-                        <Text color={theme.colors.warning}>
+                        <Text color={palette.warning}>
                             {PROVIDER_DISPLAY_NAMES[selectedProvider]} is your default provider.
                         </Text>
                     </Box>
                     <Box marginBottom={1}>
-                        <Text color={theme.colors.hint}>Select new default provider:</Text>
+                        <Text color={palette.text}>Select new default provider:</Text>
                     </Box>
                     <NewDefaultProviderSelector
                         providers={getRemainingProviders()}
@@ -444,12 +444,12 @@ function NewDefaultProviderSelector({
                 const isSelected = idx === selectedIndex;
                 return (
                     <Box key={provider}>
-                        <Text color={isSelected ? theme.colors.active : theme.colors.inactive}>
+                        <Text color={isSelected ? palette.active : palette.control}>
                             {isSelected ? '❯ ' : '  '}
                         </Text>
                         <Text
                             bold={isSelected}
-                            color={isSelected ? theme.colors.active : theme.colors.inactive}
+                            color={isSelected ? palette.active : palette.control}
                         >
                             {PROVIDER_DISPLAY_NAMES[provider]}
                         </Text>
@@ -457,7 +457,7 @@ function NewDefaultProviderSelector({
                 );
             })}
             <Box marginTop={1}>
-                <Text color={theme.colors.hint}>
+                <Text color={palette.hint}>
                     ↑/↓ select · Enter confirm · S skip · Esc cancel
                 </Text>
             </Box>

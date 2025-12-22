@@ -11,7 +11,7 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import { Select } from '../base/Select.js';
-import { theme } from '../../utils/theme.js';
+import { palette } from '../../colors.js';
 import type { Provider } from '../../../config/schema.js';
 import { PROVIDER_MODELS } from '../../../config/defaults.js';
 import type { SelectItem } from '../../utils/types.js';
@@ -56,7 +56,7 @@ export function ModelSelector({
         <Box flexDirection="column">
             {message && (
                 <Box marginBottom={1}>
-                    <Text color={theme.colors.active}>{message}</Text>
+                    <Text color={palette.text}>{message}</Text>
                 </Box>
             )}
             <Select

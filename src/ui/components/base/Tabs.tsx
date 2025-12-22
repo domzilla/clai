@@ -11,7 +11,8 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import { useKeyboardNav } from '../../hooks/useKeyboardNav.js';
-import { theme } from '../../utils/theme.js';
+import { theme } from '../../theme.js';
+import { palette } from '../../colors.js';
 import type { TabItem } from '../../utils/types.js';
 
 /** Props for the Tabs component. */
@@ -60,11 +61,11 @@ export function Tabs<T>({
 
                 let color: string;
                 if (isDisabled) {
-                    color = theme.colors.disabled;
+                    color = palette.disabled;
                 } else if (isSelected) {
-                    color = theme.colors.active;
+                    color = palette.active;
                 } else {
-                    color = theme.colors.inactive;
+                    color = palette.control;
                 }
 
                 return (
