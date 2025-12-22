@@ -16,6 +16,8 @@ import {
     configSetCommand,
     configResetCommand,
     configWizardCommand,
+    configModelCommand,
+    configProviderCommand,
 } from './commands/config.js';
 import { initCommand } from './commands/init.js';
 
@@ -53,6 +55,10 @@ configCmd
     .action(configResetCommand);
 
 configCmd.command('wizard').description('Run the setup wizard').action(configWizardCommand);
+
+configCmd.command('model').description('Select a different model').action(configModelCommand);
+
+configCmd.command('provider').description('Add, update, or remove API providers').action(configProviderCommand);
 
 // Init command for shell integration
 program
