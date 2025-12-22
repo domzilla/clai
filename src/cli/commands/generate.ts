@@ -19,6 +19,7 @@ import { configManager } from '../../config/manager.js';
 import { colors } from '../../ui/colors.js';
 import { logError } from '../../utils/errors.js';
 import type { Provider } from '../../config/schema.js';
+import { DEFAULT_MODELS, PROVIDER_MODELS } from '../../config/defaults.js';
 
 /** Options for the generate command. */
 export interface GenerateOptions {
@@ -60,8 +61,31 @@ export async function generateCommand(
         process.exit(1);
     }
 
-    const provider = (options.provider as Provider) || configManager.get('defaultProvider');
-    const model = options.model || configManager.get('defaultModel');
+    const defaultProvider = configManager.get('defaultProvider');
+    const provider = (options.provider as Provider) || defaultProvider;
+
+    // Determine model: use explicit option, or if provider changed, use that provider's default
+    let model: string;
+    if (options.model) {
+        model = options.model;
+    } else if (options.provider && options.provider !== defaultProvider) {
+        // Provider overridden without explicit model - use provider's default model
+        model = DEFAULT_MODELS[provider];
+    } else {
+        model = configManager.get('defaultModel');
+    }
+
+    // Validate model is available for the provider
+    const availableModels = PROVIDER_MODELS[provider];
+    if (!availableModels.includes(model)) {
+        console.error(
+            colors.warning(`Model '${model}' is not available for ${provider}.`),
+        );
+        console.log(colors.hint(`Available models: ${availableModels.join(', ')}`));
+        console.log(colors.hint(`Using default: ${DEFAULT_MODELS[provider]}`));
+        model = DEFAULT_MODELS[provider];
+    }
+
     const count = options.count
         ? parseInt(options.count, 10)
         : configManager.getPreference('commandCount');
