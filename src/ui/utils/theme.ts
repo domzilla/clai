@@ -20,7 +20,7 @@ export const theme = {
         /** Active/selected item highlight (background). */
         active: 'blue',
         /** Active/selected item text (contrasts with active background). */
-        activeText: 'black',
+        activeText: '#000000',
         /** Inactive/unselected items. */
         inactive: 'white',
         /** Disabled items. */
