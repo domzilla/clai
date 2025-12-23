@@ -117,11 +117,38 @@ async function fetchModelsFromApi(provider: Provider, apiKey: string): Promise<s
 }
 
 /**
- * Checks if a model ID is a dated variant (e.g., gpt-4-0613, gpt-4-1106-preview).
+ * Checks if a model ID is a dated variant (e.g., gpt-4-0613, gpt-5.2-2025-12-11).
  */
 function isDatedVariant(id: string): boolean {
-    // Match patterns like -0613, -1106, -0125, -20240101, -2024-01-01
-    return /(-\d{4,8}|-\d{4}-\d{2}(-\d{2})?)/.test(id);
+    // Match patterns like -0613, -1106, -0125, -2025-12-11, -2024-04-09
+    return /(-\d{4,8}|-\d{4}-\d{2}-\d{2})/.test(id);
+}
+
+/** Keywords to exclude from model lists. */
+const EXCLUDED_KEYWORDS = [
+    'audio',
+    'realtime',
+    'embed',
+    'preview',
+    'research',
+    'search',
+    'chat-latest', // Aliases
+    'image',
+    'codex',
+    'transcribe',
+    'tts',
+    'diarize',
+    'instruct',
+    'turbo', // Old models
+    '3.5', // Old models
+];
+
+/**
+ * Checks if a model should be excluded based on keywords.
+ */
+function shouldExcludeModel(id: string): boolean {
+    const lower = id.toLowerCase();
+    return EXCLUDED_KEYWORDS.some((kw) => lower.includes(kw));
 }
 
 /**
@@ -139,12 +166,11 @@ function parseOpenAIStyleModels(
     return data.data
         .map((m) => m.id)
         .filter((id) => prefixes.some((prefix) => id.startsWith(prefix)))
-        .filter((id) => !id.includes('audio') && !id.includes('realtime') && !id.includes('embed'))
-        .filter((id) => !isDatedVariant(id)) // Exclude dated variants
-        .filter((id) => !id.includes('preview')) // Exclude preview versions
+        .filter((id) => !shouldExcludeModel(id))
+        .filter((id) => !isDatedVariant(id))
         .sort()
-        .reverse() // Newest models typically sort last alphabetically, so reverse
-        .slice(0, 15); // Limit to top 15 models
+        .reverse()
+        .slice(0, 15);
 }
 
 /**
@@ -158,17 +184,12 @@ function parseGeminiModels(data: { models?: Array<{ name: string }> }): string[]
     return data.models
         .map((m) => m.name.replace('models/', ''))
         .filter((name) => name.startsWith('gemini-'))
-        .filter(
-            (name) =>
-                !name.includes('embedding') &&
-                !name.includes('aqa') &&
-                !name.includes('text-to-speech') &&
-                !name.includes('tts'),
-        )
-        .filter((name) => !isDatedVariant(name)) // Exclude dated variants
+        .filter((name) => !name.includes('aqa')) // Gemini-specific exclusion
+        .filter((name) => !shouldExcludeModel(name))
+        .filter((name) => !isDatedVariant(name))
         .sort()
         .reverse()
-        .slice(0, 15); // Limit to top 15 models
+        .slice(0, 15);
 }
 
 /**
