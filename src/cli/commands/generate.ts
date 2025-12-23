@@ -113,6 +113,7 @@ export async function generateCommand(
             model,
             count,
             raw,
+            quiet,
         });
 
         spinnerInstance.clear();

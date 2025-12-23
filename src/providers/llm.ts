@@ -42,6 +42,8 @@ export interface GenerateOptions {
     count?: number;
     /** Output raw LLM response for debugging. */
     raw?: boolean;
+    /** Use minimal prompt for quiet mode (saves tokens). */
+    quiet?: boolean;
 }
 
 /** Raw response structure from LLM.js. */
@@ -79,7 +81,7 @@ export class LLMProvider {
             );
         }
 
-        const systemPrompt = promptBuilder.buildSystemPrompt(systemInfo, count);
+        const systemPrompt = promptBuilder.buildSystemPrompt(systemInfo, count, options.quiet);
         const userPrompt = promptBuilder.buildUserPrompt(prompt);
 
         // Set the API key in environment for LLM.js
