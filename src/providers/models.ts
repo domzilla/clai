@@ -117,6 +117,14 @@ async function fetchModelsFromApi(provider: Provider, apiKey: string): Promise<s
 }
 
 /**
+ * Checks if a model ID is a dated variant (e.g., gpt-4-0613, gpt-4-1106-preview).
+ */
+function isDatedVariant(id: string): boolean {
+    // Match patterns like -0613, -1106, -0125, -20240101, -2024-01-01
+    return /(-\d{4,8}|-\d{4}-\d{2}(-\d{2})?)/.test(id);
+}
+
+/**
  * Parses OpenAI-style models response (also used by xAI).
  */
 function parseOpenAIStyleModels(
@@ -132,8 +140,11 @@ function parseOpenAIStyleModels(
         .map((m) => m.id)
         .filter((id) => prefixes.some((prefix) => id.startsWith(prefix)))
         .filter((id) => !id.includes('audio') && !id.includes('realtime') && !id.includes('embed'))
+        .filter((id) => !isDatedVariant(id)) // Exclude dated variants
+        .filter((id) => !id.includes('preview')) // Exclude preview versions
         .sort()
-        .reverse(); // Newest models typically sort last alphabetically, so reverse
+        .reverse() // Newest models typically sort last alphabetically, so reverse
+        .slice(0, 15); // Limit to top 15 models
 }
 
 /**
@@ -154,8 +165,10 @@ function parseGeminiModels(data: { models?: Array<{ name: string }> }): string[]
                 !name.includes('text-to-speech') &&
                 !name.includes('tts'),
         )
+        .filter((name) => !isDatedVariant(name)) // Exclude dated variants
         .sort()
-        .reverse();
+        .reverse()
+        .slice(0, 15); // Limit to top 15 models
 }
 
 /**
