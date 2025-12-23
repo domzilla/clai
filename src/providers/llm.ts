@@ -151,32 +151,30 @@ export class LLMProvider {
      * - Raw JSON
      * - Markdown code fences (```json ... ``` or ``` ... ```)
      * - JSON embedded in prose text
-     * - Multiple code blocks (extracts first JSON object/array)
      */
     private extractJson(response: string): string {
         const trimmed = response.trim();
 
-        // Strategy 1: Try to extract from markdown code fence
-        const codeBlockMatches = trimmed.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/g);
-        if (codeBlockMatches) {
-            for (const block of codeBlockMatches) {
-                const content = block.replace(/```(?:json)?\s*\n?/g, '').replace(/\n?```$/, '').trim();
-                if (this.isValidJson(content)) {
-                    return content;
-                }
+        // Strategy 1: Find JSON object by locating first { and last }
+        const firstBrace = trimmed.indexOf('{');
+        const lastBrace = trimmed.lastIndexOf('}');
+
+        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+            const candidate = trimmed.slice(firstBrace, lastBrace + 1);
+            if (this.isValidJson(candidate)) {
+                return candidate;
             }
         }
 
-        // Strategy 2: Try to find a JSON object or array in the response
-        // Look for the first { ... } or [ ... ] that forms valid JSON
-        const jsonObjectMatch = trimmed.match(/\{[\s\S]*\}/);
-        if (jsonObjectMatch && this.isValidJson(jsonObjectMatch[0])) {
-            return jsonObjectMatch[0];
-        }
+        // Strategy 2: Find JSON array by locating first [ and last ]
+        const firstBracket = trimmed.indexOf('[');
+        const lastBracket = trimmed.lastIndexOf(']');
 
-        const jsonArrayMatch = trimmed.match(/\[[\s\S]*\]/);
-        if (jsonArrayMatch && this.isValidJson(jsonArrayMatch[0])) {
-            return jsonArrayMatch[0];
+        if (firstBracket !== -1 && lastBracket !== -1 && lastBracket > firstBracket) {
+            const candidate = trimmed.slice(firstBracket, lastBracket + 1);
+            if (this.isValidJson(candidate)) {
+                return candidate;
+            }
         }
 
         // Strategy 3: Return as-is and let JSON.parse handle/fail
