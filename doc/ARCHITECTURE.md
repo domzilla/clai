@@ -99,7 +99,7 @@ Handles application startup:
 **schema.ts**: Type definitions and constants
 ```typescript
 interface ClaiConfig {
-  defaultProvider: 'openai' | 'anthropic' | 'gemini' | 'groq';
+  defaultProvider: 'openai' | 'anthropic' | 'gemini' | 'xai';
   defaultModel: string;
   apiKeys: { [provider]: string };
   preferences: { commandCount: number; showExplanations: boolean };

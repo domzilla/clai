@@ -28,7 +28,8 @@
     "openai",
     "anthropic",
     "gemini",
-    "groq"
+    "xai",
+    "grok"
   ],
   "author": "",
   "license": "MIT",

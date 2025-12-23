@@ -5,7 +5,7 @@ AI-powered shell command generator. Describe what you want to do in plain Englis
 ## Features
 
 - **Natural language to shell commands** - Just describe what you need
-- **Multiple AI providers** - OpenAI, Anthropic (Claude), Google Gemini, Groq
+- **Multiple AI providers** - OpenAI, Anthropic (Claude), Google Gemini, xAI (Grok)
 - **Cross-platform** - Works on Windows, macOS, and Linux
 - **Smart context** - Detects your OS and shell for accurate commands
 - **Multiple options** - Get several command alternatives to choose from
@@ -109,7 +109,7 @@ clai init powershell
 | OpenAI | gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-3.5-turbo |
 | Anthropic | claude-3-5-sonnet, claude-3-5-haiku, claude-3-opus |
 | Google | gemini-2.0-flash, gemini-1.5-pro, gemini-1.5-flash |
-| Groq | llama-3.3-70b, llama-3.1-8b, mixtral-8x7b |
+| xAI | grok-3, grok-3-fast, grok-2, grok-2-vision |
 
 ## Environment Variables
 
@@ -119,7 +119,7 @@ API keys can be set via environment variables (takes priority over config file):
 export OPENAI_API_KEY="sk-..."
 export ANTHROPIC_API_KEY="sk-ant-..."
 export GOOGLE_API_KEY="..."
-export GROQ_API_KEY="gsk_..."
+export XAI_API_KEY="xai-..."
 ```
 
 ## How It Works

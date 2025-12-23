@@ -1,6 +1,6 @@
 # clai
 
-CLAI is a Node.js/TypeScript CLI that generates shell commands from natural language using AI. It supports multiple providers (OpenAI, Anthropic, Gemini, Groq) and works cross-platform.
+CLAI is a Node.js/TypeScript CLI that generates shell commands from natural language using AI. It supports multiple providers (OpenAI, Anthropic, Gemini, xAI) and works cross-platform.
 
 ## Code Style
 

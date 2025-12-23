@@ -90,7 +90,7 @@ console.log(colors.label('Provider:') + ' ' + colors.value('OpenAI'));
 ### Error Message
 ```typescript
 console.log(colors.error('Invalid provider: foo'));
-console.log(colors.hint('Valid providers: openai, anthropic, gemini, groq'));
+console.log(colors.hint('Valid providers: openai, anthropic, gemini, xai'));
 ```
 
 ## Implementation
