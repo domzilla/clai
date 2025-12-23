@@ -146,20 +146,53 @@ export class LLMProvider {
     }
 
     /**
-     * Extracts JSON from a response that may be wrapped in markdown code fences.
-     * Handles responses like: ```json\n{...}\n``` or raw JSON.
+     * Extracts JSON from an LLM response that may contain markdown, text, or other formatting.
+     * Handles various formats:
+     * - Raw JSON
+     * - Markdown code fences (```json ... ``` or ``` ... ```)
+     * - JSON embedded in prose text
+     * - Multiple code blocks (extracts first JSON object/array)
      */
     private extractJson(response: string): string {
         const trimmed = response.trim();
 
-        // Check for markdown code fence
-        const codeBlockMatch = trimmed.match(/^```(?:json)?\s*\n?([\s\S]*?)\n?```$/);
-        if (codeBlockMatch?.[1]) {
-            return codeBlockMatch[1].trim();
+        // Strategy 1: Try to extract from markdown code fence
+        const codeBlockMatches = trimmed.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/g);
+        if (codeBlockMatches) {
+            for (const block of codeBlockMatches) {
+                const content = block.replace(/```(?:json)?\s*\n?/g, '').replace(/\n?```$/, '').trim();
+                if (this.isValidJson(content)) {
+                    return content;
+                }
+            }
         }
 
-        // Return as-is if no code fence found
+        // Strategy 2: Try to find a JSON object or array in the response
+        // Look for the first { ... } or [ ... ] that forms valid JSON
+        const jsonObjectMatch = trimmed.match(/\{[\s\S]*\}/);
+        if (jsonObjectMatch && this.isValidJson(jsonObjectMatch[0])) {
+            return jsonObjectMatch[0];
+        }
+
+        const jsonArrayMatch = trimmed.match(/\[[\s\S]*\]/);
+        if (jsonArrayMatch && this.isValidJson(jsonArrayMatch[0])) {
+            return jsonArrayMatch[0];
+        }
+
+        // Strategy 3: Return as-is and let JSON.parse handle/fail
         return trimmed;
+    }
+
+    /**
+     * Checks if a string is valid JSON.
+     */
+    private isValidJson(str: string): boolean {
+        try {
+            JSON.parse(str);
+            return true;
+        } catch {
+            return false;
+        }
     }
 
     private getServiceName(provider: Provider): string {
