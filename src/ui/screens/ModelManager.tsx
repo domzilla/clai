@@ -11,14 +11,18 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { Spinner } from '../components/base/Spinner.js';
+import { TextInput } from '../components/base/TextInput.js';
 import { renderAndWait } from '../utils/render.js';
 import { palette, colors } from '../colors.js';
 import type { Provider } from '../../config/schema.js';
 import { PROVIDER_DISPLAY_NAMES } from '../../config/schema.js';
 import { PROVIDER_MODELS } from '../../config/defaults.js';
-import { getModels } from '../../providers/models.js';
+import { getModels, validateModel } from '../../providers/models.js';
 import { configManager } from '../../config/manager.js';
 import type { ModelManagerResult } from '../utils/types.js';
+
+/** Special marker for the custom model option. */
+const CUSTOM_MODEL_OPTION = '[[CUSTOM]]';
 
 /** Props for the ModelManager screen. */
 interface ModelManagerScreenProps {
@@ -50,17 +54,27 @@ function ModelManagerScreen({
         Math.max(0, configuredProviders.indexOf(defaultProvider)),
     );
     const selectedProvider = configuredProviders[providerIndex] ?? defaultProvider;
-    const models = availableModels[selectedProvider] ?? PROVIDER_MODELS[selectedProvider];
+    const baseModels = availableModels[selectedProvider] ?? PROVIDER_MODELS[selectedProvider];
+    const models = [...baseModels, CUSTOM_MODEL_OPTION];
     const currentModel = providerModels[selectedProvider];
 
     const [modelIndex, setModelIndex] = useState<number>(() => {
-        const idx = models.indexOf(currentModel ?? '');
+        const idx = baseModels.indexOf(currentModel ?? '');
         return idx >= 0 ? idx : 0;
     });
+
+    // Custom model input state
+    const [isCustomMode, setIsCustomMode] = useState(false);
+    const [customModel, setCustomModel] = useState('');
+    const [isValidating, setIsValidating] = useState(false);
+    const [validationError, setValidationError] = useState<string | null>(null);
 
     // Reset model index when provider changes
     const handleProviderChange = (newIndex: number): void => {
         setProviderIndex(newIndex);
+        setIsCustomMode(false);
+        setCustomModel('');
+        setValidationError(null);
         const newProvider = configuredProviders[newIndex];
         if (newProvider) {
             const newModels = availableModels[newProvider] ?? PROVIDER_MODELS[newProvider];
@@ -70,7 +84,36 @@ function ModelManagerScreen({
         }
     };
 
+    const handleCustomSubmit = async (value: string): Promise<void> => {
+        const trimmed = value.trim();
+        if (!trimmed) {
+            setValidationError('Model name cannot be empty');
+            return;
+        }
+
+        setIsValidating(true);
+        setValidationError(null);
+
+        const apiKey = configManager.getApiKey(selectedProvider);
+        const isValid = await validateModel(selectedProvider, trimmed, apiKey);
+
+        setIsValidating(false);
+
+        if (isValid === false) {
+            setValidationError(`Model "${trimmed}" not found for ${PROVIDER_DISPLAY_NAMES[selectedProvider]}`);
+            return;
+        }
+
+        // Valid or couldn't validate (null) - accept the model
+        onResult({
+            provider: selectedProvider,
+            model: trimmed,
+        });
+    };
+
     useInput((_input, key) => {
+        if (isCustomMode || isValidating) return;
+
         if (key.escape) {
             onResult(null);
             return;
@@ -78,6 +121,10 @@ function ModelManagerScreen({
 
         if (key.return) {
             const model = models[modelIndex];
+            if (model === CUSTOM_MODEL_OPTION) {
+                setIsCustomMode(true);
+                return;
+            }
             if (model) {
                 onResult({
                     provider: selectedProvider,
@@ -103,6 +150,52 @@ function ModelManagerScreen({
             setModelIndex((prev: number) => (prev + 1) % models.length);
         }
     });
+
+    // Custom model input mode
+    if (isCustomMode) {
+        if (isValidating) {
+            return (
+                <Box flexDirection="column">
+                    <Box marginBottom={1}>
+                        <Text bold>{colors.header('Select Model')}</Text>
+                    </Box>
+                    <Spinner text={`Validating model "${customModel}"...`} />
+                </Box>
+            );
+        }
+
+        return (
+            <Box flexDirection="column">
+                <Box marginBottom={1}>
+                    <Text bold>{colors.header('Select Model')}</Text>
+                </Box>
+                <Box marginBottom={1}>
+                    <Text color={palette.secondaryText}>
+                        Enter custom model name for {PROVIDER_DISPLAY_NAMES[selectedProvider]}:
+                    </Text>
+                </Box>
+                <TextInput
+                    value={customModel}
+                    onChange={setCustomModel}
+                    onSubmit={handleCustomSubmit}
+                    onCancel={() => {
+                        setIsCustomMode(false);
+                        setCustomModel('');
+                        setValidationError(null);
+                    }}
+                    placeholder="e.g., gpt-4-turbo"
+                />
+                {validationError && (
+                    <Box marginTop={1}>
+                        <Text color={palette.error}>{validationError}</Text>
+                    </Box>
+                )}
+                <Box marginTop={1}>
+                    <Text color={palette.hint}>Enter to confirm · Esc to go back</Text>
+                </Box>
+            </Box>
+        );
+    }
 
     return (
         <Box flexDirection="column">
@@ -138,7 +231,10 @@ function ModelManagerScreen({
             <Box flexDirection="column">
                 {models.map((model: string, idx: number) => {
                     const isSelected = idx === modelIndex;
+                    const isCustomOption = model === CUSTOM_MODEL_OPTION;
                     const isCurrent = model === currentModel;
+                    const displayName = isCustomOption ? 'Enter custom model...' : model;
+
                     return (
                         <Box key={model}>
                             <Text color={isSelected ? palette.active : palette.control}>
@@ -146,9 +242,13 @@ function ModelManagerScreen({
                             </Text>
                             <Text
                                 bold={isSelected}
-                                color={isSelected ? palette.active : palette.control}
+                                color={isCustomOption
+                                    ? (isSelected ? palette.active : palette.hint)
+                                    : (isSelected ? palette.active : palette.control)
+                                }
+                                italic={isCustomOption}
                             >
-                                {model}
+                                {displayName}
                             </Text>
                             {isCurrent && (
                                 <Text color={palette.hint}> (current)</Text>

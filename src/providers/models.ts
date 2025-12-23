@@ -248,3 +248,55 @@ export function getModelsSync(provider: Provider): string[] {
 export function clearModelCache(): void {
     modelCache.clear();
 }
+
+/**
+ * Validates if a model exists for a provider by checking against the API.
+ * Returns true if the model is valid, false if invalid, or null if validation
+ * is not possible (no API endpoint or no API key).
+ *
+ * @param provider - The AI provider.
+ * @param modelId - The model ID to validate.
+ * @param apiKey - Optional API key for validation.
+ * @returns true if valid, false if invalid, null if cannot validate.
+ */
+export async function validateModel(
+    provider: Provider,
+    modelId: string,
+    apiKey?: string,
+): Promise<boolean | null> {
+    const endpoint = MODEL_ENDPOINTS[provider];
+    if (!endpoint) {
+        return null; // Cannot validate - no API endpoint
+    }
+
+    const key = apiKey || process.env[PROVIDER_ENV_VAR_NAMES[provider]];
+    if (!key) {
+        return null; // Cannot validate - no API key
+    }
+
+    try {
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+        };
+
+        let allModels: string[] = [];
+
+        if (provider === 'gemini') {
+            const url = `${endpoint}?key=${key}`;
+            const response = await fetch(url, { headers, signal: AbortSignal.timeout(5000) });
+            if (!response.ok) return null;
+            const data = (await response.json()) as { models?: Array<{ name: string }> };
+            allModels = (data.models || []).map((m) => m.name.replace('models/', ''));
+        } else {
+            headers['Authorization'] = `Bearer ${key}`;
+            const response = await fetch(endpoint, { headers, signal: AbortSignal.timeout(5000) });
+            if (!response.ok) return null;
+            const data = (await response.json()) as { data?: Array<{ id: string }> };
+            allModels = (data.data || []).map((m) => m.id);
+        }
+
+        return allModels.includes(modelId);
+    } catch {
+        return null; // Network error, cannot validate
+    }
+}
