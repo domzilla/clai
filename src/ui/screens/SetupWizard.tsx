@@ -182,7 +182,7 @@ function SetupWizardScreen({
     return (
         <Box flexDirection="column">
             <Box marginBottom={1}>
-                <Text bold>{colors.header('Welcome to CLAI - AI-Powered Shell Command Generator')}</Text>
+                <Text bold>{colors.header('Welcome to clai - AI-powered shell command generator')}</Text>
             </Box>
 
             <Box marginBottom={1}>

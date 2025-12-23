@@ -134,7 +134,7 @@ export class SetupWizard {
 
         console.log(colors.success('\nConfiguration saved successfully!'));
         console.log(colors.hint(`Config file: ${this.config.getConfigPath()}\n`));
-        console.log(colors.value('You can now use CLAI. Try:'));
+        console.log(colors.value('You can now use clai. Try:'));
         console.log(colors.command('  clai "list all files in current directory"\n'));
         console.log(colors.hint('For shell integration (optional), run:'));
         console.log(colors.command('  clai shell\n'));

@@ -31,7 +31,7 @@ export async function configShowCommand(): Promise<void> {
 
     const config = configManager.getAll();
 
-    console.log(colors.header('\nCLAI Configuration\n'));
+    console.log(colors.header('\nclai configuration\n'));
     console.log(colors.hint(`Config file: ${configManager.getConfigPath()}\n`));
 
     console.log(

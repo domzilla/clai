@@ -14,7 +14,7 @@ import { colors } from '../ui/colors.js';
 
 /** Shell integration code snippets for each shell type. */
 const SHELL_SNIPPETS: Record<ShellType, string> = {
-    zsh: `# CLAI - AI Command Generator
+    zsh: `# clai - AI Command Generator
 # Keybinding: Alt+a
 clai-widget() {
     local cmd
@@ -28,7 +28,7 @@ clai-widget() {
 zle -N clai-widget
 bindkey '\\ea' clai-widget`,
 
-    bash: `# CLAI - AI Command Generator
+    bash: `# clai - AI Command Generator
 # Keybinding: Alt+a
 clai-readline() {
     local cmd
@@ -40,7 +40,7 @@ clai-readline() {
 }
 bind -x '"\\ea": clai-readline'`,
 
-    fish: `# CLAI - AI Command Generator
+    fish: `# clai - AI Command Generator
 # Keybinding: Alt+a
 function clai-widget
     set -l cmd (commandline)
@@ -53,7 +53,7 @@ end
 
 bind \\ea clai-widget`,
 
-    powershell: `# CLAI - AI Command Generator
+    powershell: `# clai - AI Command Generator
 # Keybinding: Alt+a
 Set-PSReadLineKeyHandler -Chord 'Alt+a' -ScriptBlock {
     $line = $null
