@@ -94,6 +94,7 @@ export class LLMProvider {
             const response = await (LLM as any)(fullPrompt, {
                 service,
                 model,
+                max_tokens: 4096,
             });
 
             // Parse JSON from response (strip markdown code fences if present)
