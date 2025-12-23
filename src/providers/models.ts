@@ -181,42 +181,13 @@ export async function getModels(provider: Provider, apiKey?: string): Promise<st
     if (key) {
         const fetched = await fetchModelsFromApi(provider, key);
         if (fetched && fetched.length > 0) {
-            // Merge with fallback to ensure curated models are available
-            const merged = mergeModels(fetched, FALLBACK_MODELS[provider]);
-            modelCache.set(provider, { models: merged, timestamp: Date.now() });
-            return merged;
+            modelCache.set(provider, { models: fetched, timestamp: Date.now() });
+            return fetched;
         }
     }
 
     // Fall back to curated list
     return FALLBACK_MODELS[provider];
-}
-
-/**
- * Merges fetched models with fallback list.
- * Prioritizes fetched models but ensures fallback models are included.
- */
-function mergeModels(fetched: string[], fallback: string[]): string[] {
-    const seen = new Set<string>();
-    const result: string[] = [];
-
-    // Add fetched models first (limited to avoid overwhelming the list)
-    for (const model of fetched.slice(0, 15)) {
-        if (!seen.has(model)) {
-            seen.add(model);
-            result.push(model);
-        }
-    }
-
-    // Add fallback models that weren't in fetched list
-    for (const model of fallback) {
-        if (!seen.has(model)) {
-            seen.add(model);
-            result.push(model);
-        }
-    }
-
-    return result;
 }
 
 /**
