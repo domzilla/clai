@@ -47,9 +47,7 @@ export function ModelSelector({
         value: model,
     }));
 
-    const initialIndex = currentModel
-        ? models.indexOf(currentModel)
-        : 0;
+    const initialIndex = currentModel ? models.indexOf(currentModel) : 0;
 
     return (
         <Box flexDirection="column">

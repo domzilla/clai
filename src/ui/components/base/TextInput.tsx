@@ -79,8 +79,7 @@ export function TextInput({
 
         if (key.backspace || key.delete) {
             if (cursorPosition > 0) {
-                const newValue =
-                    value.slice(0, cursorPosition - 1) + value.slice(cursorPosition);
+                const newValue = value.slice(0, cursorPosition - 1) + value.slice(cursorPosition);
                 handleChange(newValue, cursorPosition - 1);
             }
             return;
@@ -98,8 +97,7 @@ export function TextInput({
 
         // Regular character input
         if (input && !key.ctrl && !key.meta) {
-            const newValue =
-                value.slice(0, cursorPosition) + input + value.slice(cursorPosition);
+            const newValue = value.slice(0, cursorPosition) + input + value.slice(cursorPosition);
             handleChange(newValue, cursorPosition + input.length);
         }
     });
@@ -121,9 +119,7 @@ export function TextInput({
                 ) : (
                     <>
                         <Text>{displayValue.slice(0, cursorPosition)}</Text>
-                        <Text inverse>
-                            {displayValue[cursorPosition] ?? ' '}
-                        </Text>
+                        <Text inverse>{displayValue[cursorPosition] ?? ' '}</Text>
                         <Text>{displayValue.slice(cursorPosition + 1)}</Text>
                     </>
                 )}

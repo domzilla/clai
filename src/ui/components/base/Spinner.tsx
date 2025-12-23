@@ -37,9 +37,7 @@ export function Spinner({ text }: SpinnerProps): React.ReactElement {
     return (
         <Box>
             <Text color={palette.active}>{frames[frameIndex]}</Text>
-            {text && (
-                <Text color={palette.secondaryText}> {text}</Text>
-            )}
+            {text && <Text color={palette.secondaryText}> {text}</Text>}
         </Box>
     );
 }

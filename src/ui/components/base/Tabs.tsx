@@ -70,9 +70,7 @@ export function Tabs<T>({
 
                 return (
                     <React.Fragment key={index}>
-                        {index > 0 && (
-                            <Text color="gray">{theme.chars.tabSeparator}</Text>
-                        )}
+                        {index > 0 && <Text color="gray">{theme.chars.tabSeparator}</Text>}
                         <Text color={color} bold={isSelected}>
                             {theme.chars.tabBracketLeft}
                             {tab.label}

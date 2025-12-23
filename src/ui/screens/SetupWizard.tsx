@@ -47,9 +47,7 @@ const STEPS: StepConfig[] = [
  * Shows step tabs and content in a combined view.
  * Use ←/→ to navigate between completed steps, ↑/↓ for selections.
  */
-function SetupWizardScreen({
-    onResult,
-}: SetupWizardScreenProps): React.ReactElement {
+function SetupWizardScreen({ onResult }: SetupWizardScreenProps): React.ReactElement {
     const [stepIndex, setStepIndex] = useState<number>(0);
     const [maxStepIndex, setMaxStepIndex] = useState<number>(0);
     const currentStep = STEPS[stepIndex]?.value ?? 'provider';
@@ -182,13 +180,13 @@ function SetupWizardScreen({
     return (
         <Box flexDirection="column">
             <Box marginBottom={1}>
-                <Text bold>{colors.header('Welcome to clai - AI-powered shell command generator')}</Text>
+                <Text bold>
+                    {colors.header('Welcome to clai - AI-powered shell command generator')}
+                </Text>
             </Box>
 
             <Box marginBottom={1}>
-                <Text>
-                    Let's set up your configuration.
-                </Text>
+                <Text>Let's set up your configuration.</Text>
             </Box>
 
             {/* Step tabs */}
@@ -207,12 +205,13 @@ function SetupWizardScreen({
                                     isSelected
                                         ? palette.activeText
                                         : isAccessible
-                                            ? palette.secondaryText
-                                            : palette.disabled
+                                          ? palette.secondaryText
+                                          : palette.disabled
                                 }
                                 {...(isSelected && { backgroundColor: palette.active })}
                             >
-                                {' '}{step.label}{' '}
+                                {' '}
+                                {step.label}{' '}
                             </Text>
                         </Text>
                     );
@@ -304,8 +303,8 @@ function SetupWizardScreen({
                     {currentStep === 'apiKey'
                         ? 'Enter to submit · Esc back'
                         : currentStep === 'count'
-                            ? '↑/↓ adjust · Enter confirm · Esc back'
-                            : '↑/↓ select · Enter confirm · Esc back'}
+                          ? '↑/↓ adjust · Enter confirm · Esc back'
+                          : '↑/↓ select · Enter confirm · Esc back'}
                 </Text>
             </Box>
         </Box>
@@ -318,9 +317,7 @@ function SetupWizardScreen({
  */
 export async function runSetupWizard(): Promise<SetupWizardResult> {
     const result = await renderAndWait<SetupWizardResult>((context) => (
-        <SetupWizardScreen
-            onResult={(r) => context.resolve(r)}
-        />
+        <SetupWizardScreen onResult={(r) => context.resolve(r)} />
     ));
 
     return result ?? { completed: false };

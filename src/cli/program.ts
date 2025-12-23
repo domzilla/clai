@@ -53,7 +53,10 @@ configCmd.command('wizard').description('Run the setup wizard').action(configWiz
 
 configCmd.command('model').description('Select a different model').action(configModelCommand);
 
-configCmd.command('provider').description('Add, update, or remove API providers').action(configProviderCommand);
+configCmd
+    .command('provider')
+    .description('Add, update, or remove API providers')
+    .action(configProviderCommand);
 
 // Shell integration command
 program

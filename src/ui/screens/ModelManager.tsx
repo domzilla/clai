@@ -17,10 +17,7 @@ import { palette, colors } from '../colors.js';
 import type { Provider } from '../../config/schema.js';
 import { PROVIDER_DISPLAY_NAMES } from '../../config/schema.js';
 import { PROVIDER_MODELS } from '../../config/defaults.js';
-import {
-    fetchModelsForProviders,
-    validateModelForProvider,
-} from '../../services/model-service.js';
+import { fetchModelsForProviders, validateModelForProvider } from '../../services/model-service.js';
 import type { ModelManagerResult } from '../utils/types.js';
 
 /** Special marker for the custom model option. */
@@ -109,7 +106,9 @@ function ModelManagerScreen({
         setIsValidating(false);
 
         if (isValid === false) {
-            setValidationError(`Model "${trimmed}" not found for ${PROVIDER_DISPLAY_NAMES[selectedProvider]}`);
+            setValidationError(
+                `Model "${trimmed}" not found for ${PROVIDER_DISPLAY_NAMES[selectedProvider]}`,
+            );
             return;
         }
 
@@ -145,7 +144,8 @@ function ModelManagerScreen({
 
         // Left/Right: switch provider
         if (key.leftArrow && configuredProviders.length > 1) {
-            const newIndex = (providerIndex - 1 + configuredProviders.length) % configuredProviders.length;
+            const newIndex =
+                (providerIndex - 1 + configuredProviders.length) % configuredProviders.length;
             handleProviderChange(newIndex);
         } else if (key.rightArrow && configuredProviders.length > 1) {
             const newIndex = (providerIndex + 1) % configuredProviders.length;
@@ -228,7 +228,9 @@ function ModelManagerScreen({
                                     color={isSelected ? palette.activeText : palette.secondaryText}
                                     {...(isSelected && { backgroundColor: palette.active })}
                                 >
-                                    {' '}{PROVIDER_DISPLAY_NAMES[provider]}{isDefault ? '*' : ''}{' '}
+                                    {' '}
+                                    {PROVIDER_DISPLAY_NAMES[provider]}
+                                    {isDefault ? '*' : ''}{' '}
                                 </Text>
                             </Text>
                         );
@@ -251,17 +253,20 @@ function ModelManagerScreen({
                             </Text>
                             <Text
                                 bold={isSelected}
-                                color={isCustomOption
-                                    ? (isSelected ? palette.active : palette.hint)
-                                    : (isSelected ? palette.active : palette.control)
+                                color={
+                                    isCustomOption
+                                        ? isSelected
+                                            ? palette.active
+                                            : palette.hint
+                                        : isSelected
+                                          ? palette.active
+                                          : palette.control
                                 }
                                 italic={isCustomOption}
                             >
                                 {displayName}
                             </Text>
-                            {isCurrent && (
-                                <Text color={palette.hint}> (current)</Text>
-                            )}
+                            {isCurrent && <Text color={palette.hint}> (current)</Text>}
                         </Box>
                     );
                 })}

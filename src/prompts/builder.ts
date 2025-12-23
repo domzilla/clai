@@ -9,7 +9,11 @@
  */
 
 import type { SystemInfo } from '../system/detector.js';
-import { SYSTEM_PROMPT_TEMPLATE, USER_PROMPT_TEMPLATE, QUIET_SYSTEM_PROMPT_TEMPLATE } from './templates.js';
+import {
+    SYSTEM_PROMPT_TEMPLATE,
+    USER_PROMPT_TEMPLATE,
+    QUIET_SYSTEM_PROMPT_TEMPLATE,
+} from './templates.js';
 
 /**
  * Builds prompts by interpolating system information into templates.

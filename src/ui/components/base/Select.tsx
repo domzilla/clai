@@ -73,9 +73,7 @@ export function Select<T>({
                 return (
                     <Box key={index} flexDirection="column">
                         <Box>
-                            <Text color={color}>
-                                {isSelected ? theme.chars.pointer : ' '}{' '}
-                            </Text>
+                            <Text color={color}>{isSelected ? theme.chars.pointer : ' '} </Text>
                             <Text color={color} bold={isSelected}>
                                 {item.label}
                             </Text>

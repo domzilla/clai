@@ -27,15 +27,7 @@ export const DEFAULT_CONFIG: ClaiConfig = {
  * Updated December 2025. Use aliases without dates for stability.
  */
 export const PROVIDER_MODELS: Record<Provider, string[]> = {
-    openai: [
-        'gpt-5.2',
-        'gpt-5.1',
-        'gpt-4.1',
-        'gpt-4.1-mini',
-        'gpt-4.1-nano',
-        'o4-mini',
-        'o3',
-    ],
+    openai: ['gpt-5.2', 'gpt-5.1', 'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'o4-mini', 'o3'],
     anthropic: [
         'claude-opus-4-5',
         'claude-sonnet-4-5',

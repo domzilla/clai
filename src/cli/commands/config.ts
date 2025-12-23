@@ -9,11 +9,7 @@
  */
 
 import { configManager } from '../../config/manager.js';
-import {
-    SetupWizard,
-    runProviderManager,
-    runModelManager,
-} from '../../ui/wizard.js';
+import { SetupWizard, runProviderManager, runModelManager } from '../../ui/wizard.js';
 import { colors } from '../../ui/colors.js';
 import { PROVIDERS, PROVIDER_DISPLAY_NAMES } from '../../config/schema.js';
 
@@ -52,7 +48,9 @@ export async function configShowCommand(): Promise<void> {
             const model = configManager.getModelWithFallback(provider);
             const isDefault = provider === config.defaultProvider;
             const defaultMarker = isDefault ? colors.hint(' (default)') : '';
-            console.log(`  ${colors.success('●')} ${PROVIDER_DISPLAY_NAMES[provider]}${defaultMarker}`);
+            console.log(
+                `  ${colors.success('●')} ${PROVIDER_DISPLAY_NAMES[provider]}${defaultMarker}`,
+            );
             console.log(`    ${colors.hint('Model:')} ${model}`);
         }
     }
@@ -114,7 +112,9 @@ export async function configModelCommand(): Promise<void> {
 
     // Only update the model for the selected provider (don't change default provider)
     configManager.setModel(result.provider, result.model);
-    console.log(colors.success(`${PROVIDER_DISPLAY_NAMES[result.provider]} model set to: ${result.model}`));
+    console.log(
+        colors.success(`${PROVIDER_DISPLAY_NAMES[result.provider]} model set to: ${result.model}`),
+    );
 }
 
 /**
@@ -144,7 +144,11 @@ export async function configProviderCommand(): Promise<void> {
                 configManager.setApiKey(result.provider, result.apiKey);
                 configManager.setModel(result.provider, result.model);
                 configManager.set('defaultProvider', result.provider);
-                console.log(colors.success(`${PROVIDER_DISPLAY_NAMES[result.provider]} added and set as default!`));
+                console.log(
+                    colors.success(
+                        `${PROVIDER_DISPLAY_NAMES[result.provider]} added and set as default!`,
+                    ),
+                );
                 console.log(colors.hint(`Model: ${result.model}`));
             }
             break;
@@ -152,7 +156,9 @@ export async function configProviderCommand(): Promise<void> {
         case 'update':
             if (result.provider && result.apiKey) {
                 configManager.setApiKey(result.provider, result.apiKey);
-                console.log(colors.success(`${PROVIDER_DISPLAY_NAMES[result.provider]} API key updated!`));
+                console.log(
+                    colors.success(`${PROVIDER_DISPLAY_NAMES[result.provider]} API key updated!`),
+                );
             }
             break;
 
@@ -165,7 +171,11 @@ export async function configProviderCommand(): Promise<void> {
                 if (result.newDefaultProvider && result.newDefaultModel) {
                     configManager.set('defaultProvider', result.newDefaultProvider);
                     configManager.setModel(result.newDefaultProvider, result.newDefaultModel);
-                    console.log(colors.success(`Default provider changed to ${PROVIDER_DISPLAY_NAMES[result.newDefaultProvider]}`));
+                    console.log(
+                        colors.success(
+                            `Default provider changed to ${PROVIDER_DISPLAY_NAMES[result.newDefaultProvider]}`,
+                        ),
+                    );
                     console.log(colors.hint(`Model: ${result.newDefaultModel}`));
                 } else if (result.provider === defaultProvider) {
                     // No other providers configured - warn user
@@ -178,7 +188,11 @@ export async function configProviderCommand(): Promise<void> {
         case 'default':
             if (result.provider) {
                 configManager.set('defaultProvider', result.provider);
-                console.log(colors.success(`Default provider changed to ${PROVIDER_DISPLAY_NAMES[result.provider]}`));
+                console.log(
+                    colors.success(
+                        `Default provider changed to ${PROVIDER_DISPLAY_NAMES[result.provider]}`,
+                    ),
+                );
             }
             break;
     }

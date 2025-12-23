@@ -48,9 +48,7 @@ export function ApiKeyInput({
     return (
         <Box flexDirection="column">
             <Box marginBottom={1}>
-                <Text color={palette.secondaryText}>
-                    Get your API key at: {apiKeyUrl}
-                </Text>
+                <Text color={palette.secondaryText}>Get your API key at: {apiKeyUrl}</Text>
             </Box>
             <PasswordInput
                 message={`Enter your ${displayName} API key:`}

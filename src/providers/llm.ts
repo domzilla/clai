@@ -146,7 +146,9 @@ export class LLMProvider {
             }
 
             if (message.includes('500') || message.includes('502') || message.includes('503')) {
-                throw new Error(`${provider} API is temporarily unavailable. Please try again later.`);
+                throw new Error(
+                    `${provider} API is temporarily unavailable. Please try again later.`,
+                );
             }
 
             throw wrapError(error, `Failed to generate commands via ${provider}`);

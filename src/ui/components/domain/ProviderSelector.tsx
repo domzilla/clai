@@ -90,11 +90,7 @@ export function ProviderSelector({
                     <Text>{message}</Text>
                 </Box>
             )}
-            <Select
-                items={items}
-                onSelect={handleSelect}
-                onCancel={onCancel}
-            />
+            <Select items={items} onSelect={handleSelect} onCancel={onCancel} />
         </Box>
     );
 }

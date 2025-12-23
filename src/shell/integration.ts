@@ -174,7 +174,11 @@ export class ShellIntegration {
 
         console.log(colors.value('Step 4: Test it:'));
         console.log(colors.hint('Type a description and press Alt+a'));
-        console.log(colors.command('  list files by size') + '  →  [Alt+a]  →  ' + colors.command('ls -lhS\n'));
+        console.log(
+            colors.command('  list files by size') +
+                '  →  [Alt+a]  →  ' +
+                colors.command('ls -lhS\n'),
+        );
 
         console.log(colors.hint('Tip: You can customize the keybinding by changing'));
         console.log(colors.hint('\\ea (Alt+a) to another key combination:\n'));

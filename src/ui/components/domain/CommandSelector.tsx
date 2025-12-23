@@ -87,7 +87,10 @@ export function CommandSelector({
                             <Text color={isSelected ? palette.active : palette.control}>
                                 {isSelected ? theme.chars.pointer : ' '}{' '}
                             </Text>
-                            <Text color={isSelected ? palette.active : palette.control} bold={isSelected}>
+                            <Text
+                                color={isSelected ? palette.active : palette.control}
+                                bold={isSelected}
+                            >
                                 {command}
                             </Text>
                         </Box>

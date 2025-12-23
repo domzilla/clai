@@ -51,9 +51,7 @@ function ProviderManagerScreen({
     defaultProvider,
     onResult,
 }: ProviderManagerScreenProps): React.ReactElement {
-    const unconfiguredProviders = PROVIDERS.filter(
-        (p) => !configuredProviders.includes(p),
-    );
+    const unconfiguredProviders = PROVIDERS.filter((p) => !configuredProviders.includes(p));
 
     // Build available actions based on state
     const actions: ActionConfig[] = [];
@@ -245,7 +243,7 @@ function ProviderManagerScreen({
                 <Box flexDirection="column" marginBottom={1}>
                     <Text color={palette.secondaryText}>Configured:</Text>
                     {configuredProviders.length === 0 ? (
-                        <Text color={palette.secondaryText}>  (none)</Text>
+                        <Text color={palette.secondaryText}> (none)</Text>
                     ) : (
                         <Text color={palette.secondaryText}>
                             {'  '}
@@ -272,10 +270,13 @@ function ProviderManagerScreen({
                                     <Text
                                         bold={isSelected}
                                         underline
-                                        color={isSelected ? palette.activeText : palette.secondaryText}
+                                        color={
+                                            isSelected ? palette.activeText : palette.secondaryText
+                                        }
                                         {...(isSelected && { backgroundColor: palette.active })}
                                     >
-                                        {' '}{action.label}{' '}
+                                        {' '}
+                                        {action.label}{' '}
                                     </Text>
                                 </Text>
                             );
@@ -459,9 +460,7 @@ function NewDefaultProviderSelector({
                 );
             })}
             <Box marginTop={1}>
-                <Text color={palette.hint}>
-                    ↑/↓ select · Enter confirm · S skip · Esc cancel
-                </Text>
+                <Text color={palette.hint}>↑/↓ select · Enter confirm · S skip · Esc cancel</Text>
             </Box>
         </Box>
     );

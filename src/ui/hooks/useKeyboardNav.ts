@@ -43,9 +43,7 @@ export interface UseKeyboardNavReturn {
  * Hook for keyboard navigation in lists.
  * Handles arrow keys, Enter, and Escape.
  */
-export function useKeyboardNav<T>(
-    options: UseKeyboardNavOptions<T>,
-): UseKeyboardNavReturn {
+export function useKeyboardNav<T>(options: UseKeyboardNavOptions<T>): UseKeyboardNavReturn {
     const {
         items,
         initialIndex = 0,
