@@ -86,9 +86,10 @@ Handles application startup:
 
 **commands/config.ts**: Configuration management
 - `show`: Display current configuration
-- `set <key> <value>`: Update configuration
-- `reset`: Reset to defaults
+- `provider`: Manage providers (add, update, remove, set default)
+- `model`: Change model for a provider
 - `wizard`: Re-run setup wizard
+- `reset`: Reset to defaults
 
 **commands/init.ts**: Shell integration
 - Auto-detect or accept shell argument

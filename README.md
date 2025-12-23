@@ -67,11 +67,11 @@ clai -q "count lines of code"
 # Show current config
 clai config show
 
-# Change default provider
-clai config set provider anthropic
+# Manage providers (add, update, remove, set default)
+clai config provider
 
-# Change default model
-clai config set model gpt-4o
+# Change model for a provider
+clai config model
 
 # Re-run setup wizard
 clai config wizard

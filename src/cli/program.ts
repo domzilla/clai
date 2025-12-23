@@ -13,7 +13,6 @@ import { Command } from 'commander';
 import { generateCommand } from './commands/generate.js';
 import {
     configShowCommand,
-    configSetCommand,
     configResetCommand,
     configWizardCommand,
     configModelCommand,
@@ -43,11 +42,6 @@ program
 const configCmd = program.command('config').description('Manage configuration');
 
 configCmd.command('show').description('Show current configuration').action(configShowCommand);
-
-configCmd
-    .command('set <key> <value>')
-    .description('Set a configuration value (provider, model, commandCount, showExplanations)')
-    .action(configSetCommand);
 
 configCmd
     .command('reset')
