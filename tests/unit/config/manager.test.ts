@@ -100,7 +100,7 @@ describe('ConfigManager', () => {
         });
 
         it('should return false when API key is not set', () => {
-            expect(configManager.hasApiKey('groq')).toBe(false);
+            expect(configManager.hasApiKey('xai')).toBe(false);
         });
     });
 

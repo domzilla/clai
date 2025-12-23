@@ -150,7 +150,7 @@ export class LLMProvider {
             openai: 'openai',
             anthropic: 'anthropic',
             gemini: 'google',
-            groq: 'groq',
+            xai: 'xai',
         };
 
         return serviceNames[provider];

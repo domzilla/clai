@@ -31,7 +31,7 @@ export const PROVIDER_MODELS: Record<Provider, string[]> = {
         'claude-3-opus-20240229',
     ],
     gemini: ['gemini-2.0-flash-exp', 'gemini-1.5-pro', 'gemini-1.5-flash'],
-    groq: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768'],
+    xai: ['grok-3', 'grok-3-fast', 'grok-2', 'grok-2-vision'],
 };
 
 /** Default model for each provider. */
@@ -39,7 +39,7 @@ export const DEFAULT_MODELS: Record<Provider, string> = {
     openai: 'gpt-4o-mini',
     anthropic: 'claude-3-5-sonnet-20241022',
     gemini: 'gemini-1.5-flash',
-    groq: 'llama-3.3-70b-versatile',
+    xai: 'grok-3-fast',
 };
 
 /** URLs where users can obtain API keys for each provider. */
@@ -47,7 +47,7 @@ export const PROVIDER_API_KEY_URLS: Record<Provider, string> = {
     openai: 'https://platform.openai.com/api-keys',
     anthropic: 'https://console.anthropic.com/settings/keys',
     gemini: 'https://aistudio.google.com/app/apikey',
-    groq: 'https://console.groq.com/keys',
+    xai: 'https://console.x.ai',
 };
 
 /** Environment variable names for each provider's API key. */
@@ -55,7 +55,7 @@ export const PROVIDER_ENV_VAR_NAMES: Record<Provider, string> = {
     openai: 'OPENAI_API_KEY',
     anthropic: 'ANTHROPIC_API_KEY',
     gemini: 'GOOGLE_API_KEY',
-    groq: 'GROQ_API_KEY',
+    xai: 'XAI_API_KEY',
 };
 
 /**

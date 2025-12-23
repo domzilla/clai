@@ -9,14 +9,14 @@
  */
 
 /** Supported AI provider identifiers. */
-export type Provider = 'openai' | 'anthropic' | 'gemini' | 'groq';
+export type Provider = 'openai' | 'anthropic' | 'gemini' | 'xai';
 
 /** API keys stored per provider. */
 export interface ApiKeys {
     openai?: string;
     anthropic?: string;
     gemini?: string;
-    groq?: string;
+    xai?: string;
 }
 
 /** Default models stored per provider. */
@@ -24,7 +24,7 @@ export interface ProviderModels {
     openai?: string;
     anthropic?: string;
     gemini?: string;
-    groq?: string;
+    xai?: string;
 }
 
 /** User preferences for command generation. */
@@ -48,14 +48,14 @@ export interface ClaiConfig {
 }
 
 /** List of all supported providers. */
-export const PROVIDERS: Provider[] = ['openai', 'anthropic', 'gemini', 'groq'];
+export const PROVIDERS: Provider[] = ['openai', 'anthropic', 'gemini', 'xai'];
 
 /** Human-readable display names for providers. */
 export const PROVIDER_DISPLAY_NAMES: Record<Provider, string> = {
     openai: 'OpenAI',
     anthropic: 'Anthropic (Claude)',
     gemini: 'Google Gemini',
-    groq: 'Groq',
+    xai: 'xAI (Grok)',
 };
 
 /** Risk level for generated commands. */

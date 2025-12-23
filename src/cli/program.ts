@@ -32,7 +32,7 @@ program
     .option('-m, --model <model>', 'Override the default AI model')
     .option(
         '-p, --provider <provider>',
-        'Override the default AI provider (openai|anthropic|gemini|groq)',
+        'Override the default AI provider (openai|anthropic|gemini|xai)',
     )
     .option('-n, --count <number>', 'Number of command options to generate')
     .option('-v, --verbose', 'Show detailed command explanations')
