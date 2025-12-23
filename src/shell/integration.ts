@@ -18,7 +18,7 @@ const SHELL_SNIPPETS: Record<ShellType, string> = {
 # Keybinding: Alt+a
 clai-widget() {
     local cmd
-    cmd=$(command clai "$BUFFER" 2>/dev/null)
+    cmd=$(command clai -q "$BUFFER" 2>/dev/null)
     if [[ -n "$cmd" ]]; then
         BUFFER="$cmd"
         CURSOR=\${#BUFFER}
@@ -32,7 +32,7 @@ bindkey '\\ea' clai-widget`,
 # Keybinding: Alt+a
 clai-readline() {
     local cmd
-    cmd=$(command clai "$READLINE_LINE" 2>/dev/null)
+    cmd=$(command clai -q "$READLINE_LINE" 2>/dev/null)
     if [[ -n "$cmd" ]]; then
         READLINE_LINE="$cmd"
         READLINE_POINT=\${#READLINE_LINE}
@@ -44,7 +44,7 @@ bind -x '"\\ea": clai-readline'`,
 # Keybinding: Alt+a
 function clai-widget
     set -l cmd (commandline)
-    set -l result (command clai "$cmd" 2>/dev/null)
+    set -l result (command clai -q "$cmd" 2>/dev/null)
     if test -n "$result"
         commandline -r "$result"
         commandline -f repaint
@@ -58,7 +58,7 @@ bind \\ea clai-widget`,
 Set-PSReadLineKeyHandler -Chord 'Alt+a' -ScriptBlock {
     $line = $null
     [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$line, [ref]$null)
-    $result = clai $line 2>$null
+    $result = clai -q $line 2>$null
     if ($result) {
         [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
         [Microsoft.PowerShell.PSConsoleReadLine]::Insert($result)
