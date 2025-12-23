@@ -117,11 +117,12 @@ async function fetchModelsFromApi(provider: Provider, apiKey: string): Promise<s
 }
 
 /**
- * Checks if a model ID is a dated variant (e.g., gpt-4-0613, gpt-5.2-2025-12-11).
+ * Checks if a model ID is a dated/versioned variant.
+ * Examples: gpt-4-0613, gpt-5.2-2025-12-11, gemini-2.0-flash-001
  */
 function isDatedVariant(id: string): boolean {
-    // Match patterns like -0613, -1106, -0125, -2025-12-11, -2024-04-09
-    return /(-\d{4,8}|-\d{4}-\d{2}-\d{2})/.test(id);
+    // Match patterns like -0613, -1106, -0125, -2025-12-11, -001, -002
+    return /(-\d{4,8}|-\d{4}-\d{2}-\d{2}|-0\d{2}$)/.test(id);
 }
 
 /** Keywords to exclude from model lists. */
