@@ -124,14 +124,18 @@ export async function generateCommand(
             process.exit(1);
         }
 
-        // In quiet mode, copy to clipboard and output the command
+        // In quiet mode, output the command (copy to clipboard only if interactive)
         if (quiet) {
             const firstCommand = commands[0];
             if (firstCommand) {
-                try {
-                    await clipboardy.write(firstCommand.command);
-                } catch {
-                    // Clipboard might not be available
+                // Only copy to clipboard when running interactively (TTY)
+                // Skip when piped (e.g., shell integration captures stdout directly)
+                if (process.stdout.isTTY) {
+                    try {
+                        await clipboardy.write(firstCommand.command);
+                    } catch {
+                        // Clipboard might not be available
+                    }
                 }
                 console.log(firstCommand.command);
             }
