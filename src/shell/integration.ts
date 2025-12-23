@@ -132,62 +132,55 @@ export class ShellIntegration {
         const snippet = SHELL_SNIPPETS[targetShell];
         const configFile = SHELL_CONFIG_FILES[targetShell];
 
-        console.log(colors.header('\n  Shell Integration Setup\n'));
+        console.log(colors.header('\nShell Integration Setup\n'));
 
         if (targetShell === 'cmd') {
-            console.log(colors.warning('  CMD does not support shell integration.'));
-            console.log(colors.hint('  Please use PowerShell for shell integration support.\n'));
+            console.log(colors.warning('CMD does not support shell integration.'));
+            console.log(colors.hint('Please use PowerShell for shell integration support.\n'));
             return;
         }
 
         if (targetShell === 'unknown') {
-            console.log(colors.warning('  Shell integration is not available for your shell.'));
+            console.log(colors.warning('Shell integration is not available for your shell.'));
             console.log(
                 colors.hint(
-                    '  You can still use clai directly - commands will be copied to clipboard.\n',
+                    'You can still use clai directly - commands will be copied to clipboard.\n',
                 ),
             );
             return;
         }
 
-        console.log(colors.label(`  Detected shell: `) + colors.value(targetShell));
-        console.log(colors.label(`  Config file: `) + colors.value(configFile) + '\n');
+        console.log(colors.label('Detected shell: ') + colors.value(targetShell));
+        console.log(colors.label('Config file: ') + colors.value(configFile) + '\n');
 
-        console.log(colors.value('  Step 1: Copy the following snippet:\n'));
-        console.log(
-            colors.code(
-                snippet
-                    .split('\n')
-                    .map((line) => `  ${line}`)
-                    .join('\n'),
-            ),
-        );
+        console.log(colors.value('Step 1: Copy the following snippet:\n'));
+        console.log(colors.code(snippet));
 
-        console.log(colors.value('\n  Step 2: Add it to your shell config file:'));
+        console.log(colors.value('\nStep 2: Add it to your shell config file:'));
         console.log(
-            colors.hint(`  Open ${configFile} in your editor and paste the snippet at the end.\n`),
+            colors.hint(`Open ${configFile} in your editor and paste the snippet at the end.\n`),
         );
 
         if (targetShell === 'powershell') {
-            console.log(colors.hint('  To open your PowerShell profile, run:'));
-            console.log(colors.command('    notepad $PROFILE\n'));
+            console.log(colors.hint('To open your PowerShell profile, run:'));
+            console.log(colors.command('  notepad $PROFILE\n'));
         }
 
-        console.log(colors.value('  Step 3: Reload your shell:'));
+        console.log(colors.value('Step 3: Reload your shell:'));
         const reloadCommand = SHELL_RELOAD_COMMANDS[targetShell];
         if (reloadCommand) {
-            console.log(colors.command(`    ${reloadCommand}\n`));
+            console.log(colors.command(`  ${reloadCommand}\n`));
         }
 
-        console.log(colors.value('  Step 4: Test it:'));
-        console.log(colors.hint('  Type a description and press Alt+a'));
-        console.log(colors.command('    list files by size') + '  →  [Alt+a]  →  ' + colors.command('ls -lhS\n'));
+        console.log(colors.value('Step 4: Test it:'));
+        console.log(colors.hint('Type a description and press Alt+a'));
+        console.log(colors.command('  list files by size') + '  →  [Alt+a]  →  ' + colors.command('ls -lhS\n'));
 
-        console.log(colors.hint('  Tip: You can customize the keybinding by changing'));
-        console.log(colors.hint('  \\ea (Alt+a) to another key combination:\n'));
-        console.log(colors.hint('    \\C-g     = Ctrl+g'));
-        console.log(colors.hint('    \\e\\C-a   = Alt+Ctrl+a'));
-        console.log(colors.hint('    \\C-x\\C-a = Ctrl+x followed by Ctrl+a\n'));
+        console.log(colors.hint('Tip: You can customize the keybinding by changing'));
+        console.log(colors.hint('\\ea (Alt+a) to another key combination:\n'));
+        console.log(colors.hint('  \\C-g     = Ctrl+g'));
+        console.log(colors.hint('  \\e\\C-a   = Alt+Ctrl+a'));
+        console.log(colors.hint('  \\C-x\\C-a = Ctrl+x followed by Ctrl+a\n'));
     }
 
     /**
