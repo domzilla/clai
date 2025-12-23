@@ -8,8 +8,9 @@
  * @fileoverview Model manager screen with provider tabs and model selection.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Text, useInput } from 'ink';
+import { Spinner } from '../components/base/Spinner.js';
 import { renderAndWait } from '../utils/render.js';
 import { palette, colors } from '../colors.js';
 import type { Provider } from '../../config/schema.js';
@@ -168,29 +169,76 @@ function ModelManagerScreen({
     );
 }
 
-/**
- * Fetches available models for all configured providers.
- * Uses dynamic API fetching with fallback to curated list.
- */
-async function fetchAvailableModels(
-    providers: Provider[],
-): Promise<Record<Provider, string[]>> {
-    const result: Record<Provider, string[]> = {} as Record<Provider, string[]>;
+/** Props for the ModelManagerWrapper component. */
+interface ModelManagerWrapperProps {
+    /** Configured providers to show tabs for. */
+    configuredProviders: Provider[];
+    /** Current default provider. */
+    defaultProvider: Provider;
+    /** Current models for each provider. */
+    providerModels: Record<Provider, string | undefined>;
+    /** Callback when complete. */
+    onResult: (result: ModelManagerResult | null) => void;
+}
 
-    // Fetch models for all providers in parallel
-    await Promise.all(
-        providers.map(async (provider) => {
-            const apiKey = configManager.getApiKey(provider);
-            result[provider] = await getModels(provider, apiKey);
-        }),
+/**
+ * Wrapper component that handles model fetching with loading state.
+ * Shows a spinner while fetching, then renders the model selection screen.
+ */
+function ModelManagerWrapper({
+    configuredProviders,
+    defaultProvider,
+    providerModels,
+    onResult,
+}: ModelManagerWrapperProps): React.ReactElement {
+    const [isLoading, setIsLoading] = useState(true);
+    const [availableModels, setAvailableModels] = useState<Record<Provider, string[]>>(
+        {} as Record<Provider, string[]>,
     );
 
-    return result;
+    useEffect(() => {
+        const fetchModels = async (): Promise<void> => {
+            const result: Record<Provider, string[]> = {} as Record<Provider, string[]>;
+
+            await Promise.all(
+                configuredProviders.map(async (provider) => {
+                    const apiKey = configManager.getApiKey(provider);
+                    result[provider] = await getModels(provider, apiKey);
+                }),
+            );
+
+            setAvailableModels(result);
+            setIsLoading(false);
+        };
+
+        fetchModels();
+    }, [configuredProviders]);
+
+    if (isLoading) {
+        return (
+            <Box flexDirection="column">
+                <Box marginBottom={1}>
+                    <Text bold>{colors.header('Select Model')}</Text>
+                </Box>
+                <Spinner text="Fetching available models..." />
+            </Box>
+        );
+    }
+
+    return (
+        <ModelManagerScreen
+            configuredProviders={configuredProviders}
+            defaultProvider={defaultProvider}
+            providerModels={providerModels}
+            availableModels={availableModels}
+            onResult={onResult}
+        />
+    );
 }
 
 /**
  * Runs the model manager screen.
- * Fetches available models dynamically before showing the UI.
+ * Shows a spinner while fetching available models dynamically.
  * @param configuredProviders - Providers with API keys configured.
  * @param defaultProvider - Current default provider.
  * @param providerModels - Current models for each provider.
@@ -201,15 +249,11 @@ export async function runModelManager(
     defaultProvider: Provider,
     providerModels: Record<Provider, string | undefined>,
 ): Promise<ModelManagerResult | null> {
-    // Fetch available models before rendering
-    const availableModels = await fetchAvailableModels(configuredProviders);
-
     return renderAndWait<ModelManagerResult>((context) => (
-        <ModelManagerScreen
+        <ModelManagerWrapper
             configuredProviders={configuredProviders}
             defaultProvider={defaultProvider}
             providerModels={providerModels}
-            availableModels={availableModels}
             onResult={(result) => {
                 if (result) {
                     context.resolve(result);
