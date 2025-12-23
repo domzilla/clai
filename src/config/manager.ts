@@ -17,6 +17,7 @@ import { parse as parseToml, stringify as stringifyToml } from 'smol-toml';
 import type { ClaiConfig, Provider, Preferences } from './schema.js';
 import {
     DEFAULT_CONFIG,
+    DEFAULT_MODELS,
     PROVIDER_ENV_VAR_NAMES,
     createDefaultConfig,
 } from './defaults.js';
@@ -218,6 +219,15 @@ export class ConfigManager {
      */
     getModel(provider: Provider): string | undefined {
         return this.load().models?.[provider];
+    }
+
+    /**
+     * Gets the configured model for a provider, falling back to default if not set.
+     * @param provider - The provider to get the model for.
+     * @returns The model identifier (always returns a value).
+     */
+    getModelWithFallback(provider: Provider): string {
+        return this.getModel(provider) ?? DEFAULT_MODELS[provider];
     }
 
     /**

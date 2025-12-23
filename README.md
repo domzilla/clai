@@ -158,20 +158,20 @@ clai "extract email addresses from a file"
 
 ## Configuration File
 
-Configuration is stored in `~/.clai/config.json`:
+Configuration is stored in `~/.clai/config` (TOML format):
 
-```json
-{
-  "defaultProvider": "openai",
-  "defaultModel": "gpt-4o-mini",
-  "apiKeys": {
-    "openai": "sk-..."
-  },
-  "preferences": {
-    "commandCount": 3,
-    "showExplanations": true
-  }
-}
+```toml
+defaultProvider = "openai"
+
+[apiKeys]
+openai = "sk-..."
+
+[models]
+openai = "gpt-4.1-mini"
+
+[preferences]
+commandCount = 3
+showExplanations = true
 ```
 
 ## Development

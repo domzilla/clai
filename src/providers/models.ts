@@ -10,58 +10,13 @@
  */
 
 import type { Provider } from '../config/schema.js';
-import { PROVIDER_ENV_VAR_NAMES } from '../config/defaults.js';
+import { PROVIDER_ENV_VAR_NAMES, PROVIDER_MODELS } from '../config/defaults.js';
 
 /** Cache for fetched models to avoid repeated API calls. */
 const modelCache: Map<Provider, { models: string[]; timestamp: number }> = new Map();
 
 /** Cache TTL in milliseconds (1 hour). */
 const CACHE_TTL = 60 * 60 * 1000;
-
-/**
- * Curated fallback models for each provider.
- * Updated December 2025. Use aliases without dates for stability.
- */
-export const FALLBACK_MODELS: Record<Provider, string[]> = {
-    openai: [
-        'gpt-5.2',
-        'gpt-5.1',
-        'gpt-4.1',
-        'gpt-4.1-mini',
-        'gpt-4.1-nano',
-        'o4-mini',
-        'o3',
-    ],
-    anthropic: [
-        'claude-opus-4-5',
-        'claude-sonnet-4-5',
-        'claude-haiku-4-5',
-        'claude-opus-4-1',
-        'claude-sonnet-4',
-    ],
-    gemini: [
-        'gemini-3-flash-preview',
-        'gemini-3-pro-preview',
-        'gemini-2.5-pro',
-        'gemini-2.5-flash',
-        'gemini-2.5-flash-lite',
-    ],
-    xai: [
-        'grok-4-1-fast-reasoning',
-        'grok-4-1-fast-non-reasoning',
-        'grok-4',
-        'grok-4-fast-reasoning',
-        'grok-3',
-    ],
-};
-
-/** Default model for each provider (first in fallback list). */
-export const DEFAULT_MODEL: Record<Provider, string> = {
-    openai: 'gpt-4.1-mini',
-    anthropic: 'claude-sonnet-4-5',
-    gemini: 'gemini-2.5-flash',
-    xai: 'grok-4',
-};
 
 /** Provider API endpoints for fetching models. */
 const MODEL_ENDPOINTS: Partial<Record<Provider, string>> = {
@@ -78,6 +33,49 @@ const TEXT_MODEL_PREFIXES: Record<Provider, string[]> = {
     xai: ['grok-'],
 };
 
+/** Default timeout for API requests in milliseconds. */
+const API_TIMEOUT = 5000;
+
+/** Maximum number of models to return. */
+const MAX_MODELS = 15;
+
+/**
+ * Fetches from a provider API with appropriate authentication.
+ * Handles Bearer token auth (OpenAI, xAI) and query param auth (Gemini).
+ *
+ * @param url - The API URL to fetch from.
+ * @param apiKey - The API key for authentication.
+ * @param useQueryParam - If true, append key as query param instead of header.
+ * @returns The fetch Response or null if request fails.
+ */
+async function fetchFromProviderApi(
+    url: string,
+    apiKey: string,
+    useQueryParam = false,
+): Promise<Response | null> {
+    try {
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+        };
+
+        let fetchUrl = url;
+        if (useQueryParam) {
+            fetchUrl = `${url}?key=${apiKey}`;
+        } else {
+            headers['Authorization'] = `Bearer ${apiKey}`;
+        }
+
+        const response = await fetch(fetchUrl, {
+            headers,
+            signal: AbortSignal.timeout(API_TIMEOUT),
+        });
+
+        return response.ok ? response : null;
+    } catch {
+        return null; // Network error, timeout, etc.
+    }
+}
+
 /**
  * Fetches available models from a provider's API.
  * @param provider - The AI provider to fetch models from.
@@ -90,29 +88,16 @@ async function fetchModelsFromApi(provider: Provider, apiKey: string): Promise<s
         return null; // Provider doesn't have a models API
     }
 
-    try {
-        const headers: Record<string, string> = {
-            'Content-Type': 'application/json',
-        };
+    const useQueryParam = provider === 'gemini';
+    const response = await fetchFromProviderApi(endpoint, apiKey, useQueryParam);
+    if (!response) return null;
 
-        // Set appropriate auth header based on provider
-        if (provider === 'gemini') {
-            // Gemini uses API key as query parameter
-            const url = `${endpoint}?key=${apiKey}`;
-            const response = await fetch(url, { headers, signal: AbortSignal.timeout(5000) });
-            if (!response.ok) return null;
-            const data = (await response.json()) as { models?: Array<{ name: string }> };
-            return parseGeminiModels(data);
-        } else {
-            // OpenAI and xAI use Bearer token
-            headers['Authorization'] = `Bearer ${apiKey}`;
-            const response = await fetch(endpoint, { headers, signal: AbortSignal.timeout(5000) });
-            if (!response.ok) return null;
-            const data = (await response.json()) as { data?: Array<{ id: string }> };
-            return parseOpenAIStyleModels(data, provider);
-        }
-    } catch {
-        return null; // Network error, timeout, etc.
+    if (provider === 'gemini') {
+        const data = (await response.json()) as { models?: Array<{ name: string }> };
+        return parseGeminiModels(data);
+    } else {
+        const data = (await response.json()) as { data?: Array<{ id: string }> };
+        return parseOpenAIStyleModels(data, provider);
     }
 }
 
@@ -153,6 +138,30 @@ function shouldExcludeModel(id: string): boolean {
 }
 
 /**
+ * Filters, sorts, and limits a list of model IDs.
+ * Applies prefix matching, exclusion filters, and returns top models.
+ *
+ * @param models - Raw model IDs to filter.
+ * @param prefixes - Prefixes that models must match.
+ * @param extraExclusions - Additional exclusion patterns (e.g., 'aqa' for Gemini).
+ * @returns Filtered, sorted, and limited array of model IDs.
+ */
+function filterAndSortModels(
+    models: string[],
+    prefixes: string[],
+    extraExclusions: string[] = [],
+): string[] {
+    return models
+        .filter((id) => prefixes.some((prefix) => id.startsWith(prefix)))
+        .filter((id) => !shouldExcludeModel(id))
+        .filter((id) => !isDatedVariant(id))
+        .filter((id) => !extraExclusions.some((ex) => id.includes(ex)))
+        .sort()
+        .reverse()
+        .slice(0, MAX_MODELS);
+}
+
+/**
  * Parses OpenAI-style models response (also used by xAI).
  */
 function parseOpenAIStyleModels(
@@ -163,15 +172,8 @@ function parseOpenAIStyleModels(
         return [];
     }
 
-    const prefixes = TEXT_MODEL_PREFIXES[provider];
-    return data.data
-        .map((m) => m.id)
-        .filter((id) => prefixes.some((prefix) => id.startsWith(prefix)))
-        .filter((id) => !shouldExcludeModel(id))
-        .filter((id) => !isDatedVariant(id))
-        .sort()
-        .reverse()
-        .slice(0, 15);
+    const modelIds = data.data.map((m) => m.id);
+    return filterAndSortModels(modelIds, TEXT_MODEL_PREFIXES[provider]);
 }
 
 /**
@@ -182,15 +184,8 @@ function parseGeminiModels(data: { models?: Array<{ name: string }> }): string[]
         return [];
     }
 
-    return data.models
-        .map((m) => m.name.replace('models/', ''))
-        .filter((name) => name.startsWith('gemini-'))
-        .filter((name) => !name.includes('aqa')) // Gemini-specific exclusion
-        .filter((name) => !shouldExcludeModel(name))
-        .filter((name) => !isDatedVariant(name))
-        .sort()
-        .reverse()
-        .slice(0, 15);
+    const modelIds = data.models.map((m) => m.name.replace('models/', ''));
+    return filterAndSortModels(modelIds, ['gemini-'], ['aqa']);
 }
 
 /**
@@ -222,7 +217,7 @@ export async function getModels(provider: Provider, apiKey?: string): Promise<st
     }
 
     // Fall back to curated list
-    return FALLBACK_MODELS[provider];
+    return PROVIDER_MODELS[provider];
 }
 
 /**
@@ -239,7 +234,7 @@ export function getModelsSync(provider: Provider): string[] {
         return cached.models;
     }
 
-    return FALLBACK_MODELS[provider];
+    return PROVIDER_MODELS[provider];
 }
 
 /**
@@ -274,29 +269,19 @@ export async function validateModel(
         return null; // Cannot validate - no API key
     }
 
-    try {
-        const headers: Record<string, string> = {
-            'Content-Type': 'application/json',
-        };
+    const useQueryParam = provider === 'gemini';
+    const response = await fetchFromProviderApi(endpoint, key, useQueryParam);
+    if (!response) return null;
 
-        let allModels: string[] = [];
+    let allModels: string[] = [];
 
-        if (provider === 'gemini') {
-            const url = `${endpoint}?key=${key}`;
-            const response = await fetch(url, { headers, signal: AbortSignal.timeout(5000) });
-            if (!response.ok) return null;
-            const data = (await response.json()) as { models?: Array<{ name: string }> };
-            allModels = (data.models || []).map((m) => m.name.replace('models/', ''));
-        } else {
-            headers['Authorization'] = `Bearer ${key}`;
-            const response = await fetch(endpoint, { headers, signal: AbortSignal.timeout(5000) });
-            if (!response.ok) return null;
-            const data = (await response.json()) as { data?: Array<{ id: string }> };
-            allModels = (data.data || []).map((m) => m.id);
-        }
-
-        return allModels.includes(modelId);
-    } catch {
-        return null; // Network error, cannot validate
+    if (provider === 'gemini') {
+        const data = (await response.json()) as { models?: Array<{ name: string }> };
+        allModels = (data.models || []).map((m) => m.name.replace('models/', ''));
+    } else {
+        const data = (await response.json()) as { data?: Array<{ id: string }> };
+        allModels = (data.data || []).map((m) => m.id);
     }
+
+    return allModels.includes(modelId);
 }

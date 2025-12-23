@@ -20,7 +20,7 @@ import { configManager } from '../../config/manager.js';
 import { colors } from '../../ui/colors.js';
 import { logError } from '../../utils/errors.js';
 import type { Provider } from '../../config/schema.js';
-import { DEFAULT_MODELS, PROVIDER_MODELS } from '../../config/defaults.js';
+import { validateModelForProvider } from '../../services/model-service.js';
 import { Spinner } from '../../ui/components/base/Spinner.js';
 
 /** Options for the generate command. */
@@ -68,23 +68,22 @@ export async function generateCommand(
     const defaultProvider = configManager.get('defaultProvider');
     const provider = (options.provider as Provider) || defaultProvider;
 
-    // Determine model: use explicit option, or provider's configured model, or provider's default
+    // Determine model: use explicit option, or provider's configured model (with fallback)
     let model: string;
     if (options.model) {
         model = options.model;
-    } else {
-        model = configManager.getModel(provider) ?? DEFAULT_MODELS[provider];
-    }
 
-    // Validate model is available for the provider
-    const availableModels = PROVIDER_MODELS[provider];
-    if (!availableModels.includes(model)) {
-        console.error(
-            colors.warning(`Model '${model}' is not available for ${provider}.`),
-        );
-        console.log(colors.hint(`Available models: ${availableModels.join(', ')}`));
-        console.log(colors.hint(`Using default: ${DEFAULT_MODELS[provider]}`));
-        model = DEFAULT_MODELS[provider];
+        // Validate explicitly provided model via API
+        const isValid = await validateModelForProvider(provider, model);
+        if (isValid === false) {
+            const defaultModel = configManager.getModelWithFallback(provider);
+            console.error(colors.warning(`Model '${model}' not found for ${provider}.`));
+            console.log(colors.hint(`Using default: ${defaultModel}`));
+            model = defaultModel;
+        }
+        // If isValid is null (couldn't validate), proceed with user's choice
+    } else {
+        model = configManager.getModelWithFallback(provider);
     }
 
     const count = options.count

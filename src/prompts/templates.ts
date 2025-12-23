@@ -64,5 +64,5 @@ export const USER_PROMPT_TEMPLATE = `Generate shell commands for the following r
  * Optimized to reduce token usage when only the command is needed.
  * Placeholders: {{OS}}, {{SHELL}}, {{CWD}}
  */
-export const QUIET_SYSTEM_PROMPT_TEMPLATE = `Generate one shell command for {{OS}}/{{SHELL}}. CWD: {{CWD}}
+export const QUIET_SYSTEM_PROMPT_TEMPLATE = `Generate one shell command for {{OS}}/{{SHELL}}. Command runs from {{CWD}} (no cd needed).
 Reply with JSON only: {"commands":[{"command":"CMD","description":"","explanation":"","risk":"low"}]}`;

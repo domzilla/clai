@@ -17,8 +17,10 @@ import { palette, colors } from '../colors.js';
 import type { Provider } from '../../config/schema.js';
 import { PROVIDER_DISPLAY_NAMES } from '../../config/schema.js';
 import { PROVIDER_MODELS } from '../../config/defaults.js';
-import { getModels, validateModel } from '../../providers/models.js';
-import { configManager } from '../../config/manager.js';
+import {
+    fetchModelsForProviders,
+    validateModelForProvider,
+} from '../../services/model-service.js';
 import type { ModelManagerResult } from '../utils/types.js';
 
 /** Special marker for the custom model option. */
@@ -102,8 +104,7 @@ function ModelManagerScreen({
         setIsValidating(true);
         setValidationError(null);
 
-        const apiKey = configManager.getApiKey(selectedProvider);
-        const isValid = await validateModel(selectedProvider, trimmed, apiKey);
+        const isValid = await validateModelForProvider(selectedProvider, trimmed);
 
         setIsValidating(false);
 
@@ -305,21 +306,13 @@ function ModelManagerWrapper({
     );
 
     useEffect(() => {
-        const fetchModels = async (): Promise<void> => {
-            const result: Record<Provider, string[]> = {} as Record<Provider, string[]>;
-
-            await Promise.all(
-                configuredProviders.map(async (provider) => {
-                    const apiKey = configManager.getApiKey(provider);
-                    result[provider] = await getModels(provider, apiKey);
-                }),
-            );
-
+        const loadModels = async (): Promise<void> => {
+            const result = await fetchModelsForProviders(configuredProviders);
             setAvailableModels(result);
             setIsLoading(false);
         };
 
-        fetchModels();
+        loadModels();
     }, [configuredProviders]);
 
     if (isLoading) {

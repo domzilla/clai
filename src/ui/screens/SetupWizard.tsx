@@ -17,7 +17,7 @@ import { palette, colors } from '../colors.js';
 import type { Provider } from '../../config/schema.js';
 import { PROVIDERS, PROVIDER_DISPLAY_NAMES } from '../../config/schema.js';
 import { PROVIDER_MODELS } from '../../config/defaults.js';
-import { getModels } from '../../providers/models.js';
+import { fetchModelsForProvider } from '../../services/model-service.js';
 import type { SetupWizardResult } from '../utils/types.js';
 
 /** Props for the SetupWizard screen. */
@@ -70,7 +70,7 @@ function SetupWizardScreen({
     useEffect(() => {
         if (provider && apiKey && currentStep === 'model' && models.length === 0) {
             setIsLoadingModels(true);
-            getModels(provider, apiKey)
+            fetchModelsForProvider(provider, apiKey)
                 .then((fetchedModels) => {
                     setModels(fetchedModels.length > 0 ? fetchedModels : PROVIDER_MODELS[provider]);
                 })

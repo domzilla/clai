@@ -22,6 +22,8 @@ src/
 ├── providers/
 │   ├── llm.ts            # LLM.js wrapper for AI provider communication
 │   └── models.ts         # Hybrid model fetcher (dynamic API + fallback)
+├── services/
+│   └── model-service.ts  # Model service (abstracts config + provider access)
 ├── prompts/
 │   ├── templates.ts      # System and user prompt templates
 │   └── builder.ts        # Prompt construction with system info injection
@@ -131,15 +133,25 @@ const RISK_LEVELS: RiskLevel[];
 - Constructs model identifier with provider prefix
 - Parses JSON response into `GeneratedCommand[]`
 - Validates risk levels
+- Uses `configManager.getModelWithFallback()` for model resolution
 
 **models.ts**: Hybrid model fetcher
 - Fetches available models from provider APIs (OpenAI, xAI, Gemini)
-- Falls back to curated list for providers without models API (Anthropic)
+- Falls back to `PROVIDER_MODELS` from `defaults.ts` for providers without models API (Anthropic)
 - Caches results for 1 hour to avoid repeated API calls
-- Filters results to only include text generation models
-- Exports `getModels()` (async) and `getModelsSync()` (fallback only)
+- Filters results to only include text generation models using `filterAndSortModels()`
+- Uses `fetchFromProviderApi()` utility for consistent API calls
+- Exports `getModels()` (async), `getModelsSync()` (fallback only), and `validateModel()`
 
-### 5. Prompt Layer (`src/prompts/`)
+### 5. Services Layer (`src/services/`)
+
+**model-service.ts**: Abstracts model operations for UI screens
+- `fetchModelsForProvider(provider, apiKey?)`: Fetches models with automatic API key resolution
+- `validateModelForProvider(provider, model)`: Validates model via API
+- `fetchModelsForProviders(providers)`: Batch fetch for multiple providers
+- Encapsulates config manager and provider access, improving separation of concerns
+
+### 6. Prompt Layer (`src/prompts/`)
 
 **templates.ts**: Prompt templates with placeholders
 - System prompt: Includes OS, shell, CWD, command count, JSON format instructions
@@ -149,7 +161,7 @@ const RISK_LEVELS: RiskLevel[];
 - Replaces placeholders with actual system info
 - Returns complete prompts ready for AI
 
-### 6. System Detection (`src/system/`)
+### 7. System Detection (`src/system/`)
 
 **detector.ts**: Platform detection
 - Detects OS: windows | macos | linux
@@ -157,7 +169,7 @@ const RISK_LEVELS: RiskLevel[];
 - Provides shell-specific info (separators, null device)
 - Returns config file paths for each shell
 
-### 7. UI Layer (`src/ui/`)
+### 8. UI Layer (`src/ui/`)
 
 The UI layer uses **ink** (React for CLI) for interactive terminal interfaces with horizontal tab navigation.
 
@@ -186,10 +198,10 @@ The UI layer uses **ink** (React for CLI) for interactive terminal interfaces wi
 
 **Facade Layer**:
 - `wizard.ts`: Exports helper functions (`selectProvider`, `enterApiKey`, `selectModel`) and `SetupWizard` class
-- `selector.ts`: Exports `CommandSelector` class with `select()` and `formatForDisplay()` methods
+- `selector.ts`: Exports `CommandSelector` class with `select()` and `formatForDisplay()` methods, plus risk formatting utilities (`RISK_COLORS`, `formatRiskBullet`, `formatRiskBadge`)
 - `colors.ts`: Centralized chalk-based styling utilities
 
-### 8. Shell Integration (`src/shell/`)
+### 9. Shell Integration (`src/shell/`)
 
 **integration.ts**: Shell snippets
 - Pre-defined snippets for bash, zsh, fish, powershell
@@ -198,7 +210,7 @@ The UI layer uses **ink** (React for CLI) for interactive terminal interfaces wi
 - Instructions for manual setup
 - Config file paths per shell
 
-### 9. Utilities (`src/utils/`)
+### 10. Utilities (`src/utils/`)
 
 **errors.ts**: Error handling utilities
 - `getErrorMessage()`: Extracts message from unknown error

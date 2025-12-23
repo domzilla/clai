@@ -29,10 +29,11 @@ Before submitting any code changes, verify they conform to the style guide.
 | `src/config/manager.ts` | Configuration persistence |
 | `src/providers/llm.ts` | AI provider wrapper |
 | `src/providers/models.ts` | Hybrid model fetcher (dynamic API + fallback) |
+| `src/services/model-service.ts` | Model service (abstracts model fetching/validation) |
 | `src/system/detector.ts` | OS/shell detection |
 | `src/ui/colors.ts` | Centralized color utility |
 | `src/ui/wizard.ts` | Setup wizard facade and helper functions |
-| `src/ui/selector.ts` | Command selection facade |
+| `src/ui/selector.ts` | Command selection facade and risk formatting |
 | `src/ui/components/base/` | Reusable ink components (Tabs, Select, etc.) |
 | `src/ui/screens/` | Full-screen ink apps (SetupWizard, ProviderManager, etc.) |
 | `src/utils/errors.ts` | Shared error handling utilities |
@@ -116,6 +117,7 @@ Centralized constants to avoid duplication:
 | `PROVIDERS` | `config/schema.ts` | List of supported providers |
 | `RISK_LEVELS` | `config/schema.ts` | Valid risk level values |
 | `PROVIDER_ENV_VAR_NAMES` | `config/defaults.ts` | Provider to env var mapping |
-| `PROVIDER_MODELS` | `config/defaults.ts` | Fallback models per provider |
-| `FALLBACK_MODELS` | `providers/models.ts` | Curated fallback model list |
+| `PROVIDER_MODELS` | `config/defaults.ts` | Fallback models per provider (single source of truth) |
+| `DEFAULT_MODELS` | `config/defaults.ts` | Default model per provider |
+| `RISK_COLORS` | `ui/selector.ts` | Risk level color functions |
 | `SHELL_RELOAD_COMMANDS` | `shell/integration.ts` | Shell reload commands |

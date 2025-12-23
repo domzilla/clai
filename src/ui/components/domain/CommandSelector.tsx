@@ -12,9 +12,9 @@ import React from 'react';
 import { Box, Text } from 'ink';
 import { useKeyboardNav } from '../../hooks/useKeyboardNav.js';
 import { theme } from '../../theme.js';
-import { palette, colors } from '../../colors.js';
+import { palette } from '../../colors.js';
+import { formatRiskBullet } from '../../selector.js';
 import type { GeneratedCommand } from '../../../providers/llm.js';
-import type { RiskLevel } from '../../../config/schema.js';
 
 /** Props for the CommandSelector component. */
 export interface CommandSelectorProps {
@@ -26,21 +26,6 @@ export interface CommandSelectorProps {
     onSelect: (command: GeneratedCommand) => void;
     /** Callback when user cancels. */
     onCancel?: (() => void) | undefined;
-}
-
-/**
- * Formats risk level with color.
- */
-function formatRisk(risk: RiskLevel): string {
-    const bullet = theme.chars.riskBullet;
-    switch (risk) {
-        case 'low':
-            return colors.riskLow(bullet);
-        case 'medium':
-            return colors.riskMedium(bullet);
-        case 'high':
-            return colors.riskHigh(bullet);
-    }
 }
 
 /** Item wrapper for keyboard navigation. */
@@ -94,7 +79,7 @@ export function CommandSelector({
                 }
 
                 const { command, description, explanation, risk } = item.command;
-                const riskBadge = formatRisk(risk);
+                const riskBadge = formatRiskBullet(risk);
 
                 return (
                     <Box key={index} flexDirection="column" marginBottom={1}>

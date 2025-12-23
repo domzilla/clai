@@ -16,7 +16,6 @@ import {
 } from '../../ui/wizard.js';
 import { colors } from '../../ui/colors.js';
 import { PROVIDERS, PROVIDER_DISPLAY_NAMES } from '../../config/schema.js';
-import { DEFAULT_MODELS } from '../../config/defaults.js';
 
 /**
  * Displays the current configuration.
@@ -50,7 +49,7 @@ export async function configShowCommand(): Promise<void> {
     for (const provider of PROVIDERS) {
         const hasKey = configManager.hasApiKey(provider);
         if (hasKey) {
-            const model = configManager.getModel(provider) ?? DEFAULT_MODELS[provider];
+            const model = configManager.getModelWithFallback(provider);
             const isDefault = provider === config.defaultProvider;
             const defaultMarker = isDefault ? colors.hint(' (default)') : '';
             console.log(`  ${colors.success('●')} ${PROVIDER_DISPLAY_NAMES[provider]}${defaultMarker}`);
@@ -103,7 +102,7 @@ export async function configModelCommand(): Promise<void> {
     // Build map of current models for each configured provider
     const providerModels: Record<string, string | undefined> = {};
     for (const provider of configuredProviders) {
-        providerModels[provider] = configManager.getModel(provider) ?? DEFAULT_MODELS[provider];
+        providerModels[provider] = configManager.getModelWithFallback(provider);
     }
 
     const result = await runModelManager(configuredProviders, defaultProvider, providerModels);

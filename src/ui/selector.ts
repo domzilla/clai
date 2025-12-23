@@ -14,28 +14,31 @@ import { colors } from './colors.js';
 import { runCommandPicker } from './screens/CommandPicker.js';
 
 /** Risk color functions mapped to colors utility. */
-const RISK_COLORS: Record<RiskLevel, (text: string) => string> = {
+export const RISK_COLORS: Record<RiskLevel, (text: string) => string> = {
     low: colors.riskLow,
     medium: colors.riskMedium,
     high: colors.riskHigh,
 };
 
-/** Unicode icons for each risk level. */
-const RISK_ICONS: Record<RiskLevel, string> = {
-    low: '●',
-    medium: '●',
-    high: '●',
-};
+/** Unicode bullet icon for risk indicators. */
+export const RISK_BULLET = '●';
 
 /**
- * Formats a risk level as a colored badge with icon.
+ * Formats a risk level as a colored bullet.
  * @param risk - The risk level to format.
- * @returns Styled risk badge string.
+ * @returns Styled risk bullet string.
  */
-function formatRiskBadge(risk: RiskLevel): string {
-    const color = RISK_COLORS[risk];
-    const icon = RISK_ICONS[risk];
-    return color(`${icon} ${risk}`);
+export function formatRiskBullet(risk: RiskLevel): string {
+    return RISK_COLORS[risk](RISK_BULLET);
+}
+
+/**
+ * Formats a risk level as a colored badge with icon and label.
+ * @param risk - The risk level to format.
+ * @returns Styled risk badge string (e.g., "● low").
+ */
+export function formatRiskBadge(risk: RiskLevel): string {
+    return RISK_COLORS[risk](`${RISK_BULLET} ${risk}`);
 }
 
 /**
