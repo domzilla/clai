@@ -51,7 +51,7 @@ npm run lint       # Lint code
 1. **Config location**: `~/.clai/config`
 2. **API keys**: Environment variables take priority over config file
 3. **Output**: UI goes to stderr, command output to stdout (for shell integration)
-4. **Shell integration**: `clai init` shows instructions only, never modifies files
+4. **Shell integration**: `clai shell` shows instructions only, never modifies files
 5. **Model fetching**: Models are fetched dynamically from provider APIs with fallback to curated list
 
 ## UI and Colors

@@ -46,7 +46,7 @@ describe('CLI Integration', () => {
             expect(output).toContain('--model');
             expect(output).toContain('--provider');
             expect(output).toContain('config');
-            expect(output).toContain('init');
+            expect(output).toContain('shell');
         });
     });
 
@@ -56,15 +56,14 @@ describe('CLI Integration', () => {
 
             expect(output).toContain('Manage configuration');
             expect(output).toContain('show');
-            expect(output).toContain('set');
             expect(output).toContain('reset');
             expect(output).toContain('wizard');
         });
     });
 
-    describe('init', () => {
+    describe('shell', () => {
         it('should show shell integration instructions for zsh', () => {
-            const output = runCli('init zsh');
+            const output = runCli('shell zsh');
 
             expect(output).toContain('Shell Integration Setup');
             expect(output).toContain('zsh');
@@ -74,7 +73,7 @@ describe('CLI Integration', () => {
         });
 
         it('should show shell integration instructions for bash', () => {
-            const output = runCli('init bash');
+            const output = runCli('shell bash');
 
             expect(output).toContain('Shell Integration Setup');
             expect(output).toContain('bash');
@@ -83,7 +82,7 @@ describe('CLI Integration', () => {
         });
 
         it('should show shell integration instructions for fish', () => {
-            const output = runCli('init fish');
+            const output = runCli('shell fish');
 
             expect(output).toContain('Shell Integration Setup');
             expect(output).toContain('fish');
@@ -91,7 +90,7 @@ describe('CLI Integration', () => {
         });
 
         it('should show shell integration instructions for powershell', () => {
-            const output = runCli('init powershell');
+            const output = runCli('shell powershell');
 
             expect(output).toContain('Shell Integration Setup');
             expect(output).toContain('powershell');

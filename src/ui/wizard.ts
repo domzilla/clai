@@ -137,7 +137,7 @@ export class SetupWizard {
         console.log(colors.value('You can now use CLAI. Try:'));
         console.log(colors.command('  clai "list all files in current directory"\n'));
         console.log(colors.hint('For shell integration (optional), run:'));
-        console.log(colors.command('  clai init\n'));
+        console.log(colors.command('  clai shell\n'));
 
         return true;
     }

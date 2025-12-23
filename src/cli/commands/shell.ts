@@ -1,11 +1,11 @@
 /**
- * @file init.ts
- * @module src/cli/commands/init
+ * @file shell.ts
+ * @module src/cli/commands/shell
  * @author Dominic Rodemer
  * @created 2025-12-21
  * @license MIT
  *
- * @fileoverview Shell integration initialization command.
+ * @fileoverview Shell integration command.
  * Displays setup instructions for different shells.
  */
 
@@ -20,7 +20,7 @@ const VALID_SHELLS: ShellType[] = ['bash', 'zsh', 'fish', 'powershell'];
  * Displays shell integration setup instructions.
  * @param shell - Optional shell type (auto-detects if not specified).
  */
-export async function initCommand(shell?: string): Promise<void> {
+export async function shellCommand(shell?: string): Promise<void> {
     if (shell) {
         // Validate shell argument
         if (!VALID_SHELLS.includes(shell as ShellType)) {

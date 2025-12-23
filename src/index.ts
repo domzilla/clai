@@ -24,7 +24,7 @@ async function main(): Promise<void> {
     const firstArg = args[0];
 
     // Check if this is a subcommand that doesn't need config
-    const noConfigCommands = ['config', 'init', '--help', '-h', '--version', '-V'];
+    const noConfigCommands = ['config', 'shell', '--help', '-h', '--version', '-V'];
     const isNoConfigCommand = noConfigCommands.some((cmd) => firstArg === cmd);
 
     // If no valid config exists and not running a no-config command, run wizard

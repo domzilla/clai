@@ -258,7 +258,7 @@ API keys from environment variables take precedence over config file values, ena
 Interactive UI elements (spinner, menu) write to stderr, while the selected command writes to stdout. This enables shell integration via command substitution.
 
 ### 5. No Auto-modification of Shell Configs
-`clai init` only displays instructions; it never modifies user files. This respects user control and avoids potential issues.
+`clai shell` only displays instructions; it never modifies user files. This respects user control and avoids potential issues.
 
 ### 6. Unified LLM Interface
 Using LLM.js provides a single API for multiple providers, simplifying provider switching and reducing code duplication.

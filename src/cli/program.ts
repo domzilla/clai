@@ -18,7 +18,7 @@ import {
     configModelCommand,
     configProviderCommand,
 } from './commands/config.js';
-import { initCommand } from './commands/init.js';
+import { shellCommand } from './commands/shell.js';
 
 /** Commander.js program instance for CLAI. */
 export const program = new Command();
@@ -55,8 +55,8 @@ configCmd.command('model').description('Select a different model').action(config
 
 configCmd.command('provider').description('Add, update, or remove API providers').action(configProviderCommand);
 
-// Init command for shell integration
+// Shell integration command
 program
-    .command('init [shell]')
+    .command('shell [type]')
     .description('Show shell integration setup instructions')
-    .action(initCommand);
+    .action(shellCommand);

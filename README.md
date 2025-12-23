@@ -86,13 +86,13 @@ For a seamless experience, you can set up shell integration. This lets you type 
 
 ```bash
 # Show setup instructions for your shell
-clai init
+clai shell
 
 # Or specify a shell
-clai init zsh
-clai init bash
-clai init fish
-clai init powershell
+clai shell zsh
+clai shell bash
+clai shell fish
+clai shell powershell
 ```
 
 **How it works after setup:**
