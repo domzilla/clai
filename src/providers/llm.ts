@@ -96,8 +96,9 @@ export class LLMProvider {
                 model,
             });
 
-            // Parse JSON from response
-            const parsed = JSON.parse(response as string) as LLMResponse;
+            // Parse JSON from response (strip markdown code fences if present)
+            const jsonString = this.extractJson(response as string);
+            const parsed = JSON.parse(jsonString) as LLMResponse;
             return this.parseResponse(parsed);
         } catch (error) {
             // Provide more helpful error messages
@@ -142,6 +143,23 @@ export class LLMProvider {
 
     private setApiKeyEnv(provider: Provider, apiKey: string): void {
         process.env[PROVIDER_ENV_VAR_NAMES[provider]] = apiKey;
+    }
+
+    /**
+     * Extracts JSON from a response that may be wrapped in markdown code fences.
+     * Handles responses like: ```json\n{...}\n``` or raw JSON.
+     */
+    private extractJson(response: string): string {
+        const trimmed = response.trim();
+
+        // Check for markdown code fence
+        const codeBlockMatch = trimmed.match(/^```(?:json)?\s*\n?([\s\S]*?)\n?```$/);
+        if (codeBlockMatch?.[1]) {
+            return codeBlockMatch[1].trim();
+        }
+
+        // Return as-is if no code fence found
+        return trimmed;
     }
 
     private getServiceName(provider: Provider): string {
