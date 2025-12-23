@@ -24,6 +24,14 @@ import type { ModelManagerResult } from '../utils/types.js';
 /** Special marker for the custom model option. */
 const CUSTOM_MODEL_OPTION = '[[CUSTOM]]';
 
+/** Placeholder examples for custom model input per provider. */
+const MODEL_PLACEHOLDERS: Record<Provider, string> = {
+    openai: 'e.g., gpt-4-turbo',
+    anthropic: 'e.g., claude-3-opus-20240229',
+    gemini: 'e.g., gemini-1.5-pro',
+    xai: 'e.g., grok-beta',
+};
+
 /** Props for the ModelManager screen. */
 interface ModelManagerScreenProps {
     /** Configured providers to show tabs for. */
@@ -171,7 +179,7 @@ function ModelManagerScreen({
                 </Box>
                 <Box marginBottom={1}>
                     <Text color={palette.secondaryText}>
-                        Enter custom model name for {PROVIDER_DISPLAY_NAMES[selectedProvider]}:
+                        Enter model name for {PROVIDER_DISPLAY_NAMES[selectedProvider]}:
                     </Text>
                 </Box>
                 <TextInput
@@ -183,7 +191,7 @@ function ModelManagerScreen({
                         setCustomModel('');
                         setValidationError(null);
                     }}
-                    placeholder="e.g., gpt-4-turbo"
+                    placeholder={MODEL_PLACEHOLDERS[selectedProvider]}
                 />
                 {validationError && (
                     <Box marginTop={1}>
@@ -233,7 +241,7 @@ function ModelManagerScreen({
                     const isSelected = idx === modelIndex;
                     const isCustomOption = model === CUSTOM_MODEL_OPTION;
                     const isCurrent = model === currentModel;
-                    const displayName = isCustomOption ? 'Enter custom model...' : model;
+                    const displayName = isCustomOption ? 'Enter model...' : model;
 
                     return (
                         <Box key={model}>
