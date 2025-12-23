@@ -111,6 +111,7 @@ export async function generateCommand(
             count,
         });
 
+        spinnerInstance.clear();
         spinnerInstance.unmount();
 
         if (commands.length === 0) {
@@ -138,15 +139,16 @@ export async function generateCommand(
         // Copy to clipboard
         try {
             await clipboardy.write(selected.command);
-            console.error(colors.hint('\nCommand copied to clipboard!'));
+            console.error(colors.hint('Command copied to clipboard!'));
         } catch {
             // Clipboard might not be available
-            console.error(colors.hint('\n(Could not copy to clipboard)'));
+            console.error(colors.hint('(Could not copy to clipboard)'));
         }
 
         // Output the command to stdout (for shell integration)
         console.log(selected.command);
     } catch (error) {
+        spinnerInstance.clear();
         spinnerInstance.unmount();
         logError(error);
         process.exit(1);
