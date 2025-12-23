@@ -124,10 +124,15 @@ export async function generateCommand(
             process.exit(1);
         }
 
-        // In quiet mode, just output the first command
+        // In quiet mode, copy to clipboard and output the command
         if (quiet) {
             const firstCommand = commands[0];
             if (firstCommand) {
+                try {
+                    await clipboardy.write(firstCommand.command);
+                } catch {
+                    // Clipboard might not be available
+                }
                 console.log(firstCommand.command);
             }
             return;
