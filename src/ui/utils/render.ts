@@ -42,10 +42,12 @@ export async function renderAndWait<T>(
     return new Promise((resolve) => {
         const context: RenderContext<T> = {
             resolve: (result: T) => {
+                instance.clear();
                 instance.unmount();
                 resolve(result);
             },
             cancel: () => {
+                instance.clear();
                 instance.unmount();
                 resolve(null);
             },

@@ -172,13 +172,13 @@ export async function configModelCommand(): Promise<void> {
     const result = await runModelManager(configuredProviders, defaultProvider, providerModels);
 
     if (!result) {
-        console.log(colors.hint('\n  Cancelled.\n'));
+        console.log(colors.hint('Cancelled.'));
         return;
     }
 
     // Only update the model for the selected provider (don't change default provider)
     configManager.setModel(result.provider, result.model);
-    console.log(colors.success(`\n  ${PROVIDER_DISPLAY_NAMES[result.provider]} model set to: ${result.model}\n`));
+    console.log(colors.success(`${PROVIDER_DISPLAY_NAMES[result.provider]} model set to: ${result.model}`));
 }
 
 /**
@@ -198,7 +198,7 @@ export async function configProviderCommand(): Promise<void> {
     const result = await runProviderManager(configuredProviders, defaultProvider);
 
     if (result.action === 'cancel') {
-        console.log(colors.hint('\n  Cancelled.\n'));
+        console.log(colors.hint('Cancelled.'));
         return;
     }
 
@@ -208,42 +208,41 @@ export async function configProviderCommand(): Promise<void> {
                 configManager.setApiKey(result.provider, result.apiKey);
                 configManager.setModel(result.provider, result.model);
                 configManager.set('defaultProvider', result.provider);
-                console.log(colors.success(`\n  ${PROVIDER_DISPLAY_NAMES[result.provider]} added and set as default!`));
-                console.log(colors.hint(`  Model: ${result.model}\n`));
+                console.log(colors.success(`${PROVIDER_DISPLAY_NAMES[result.provider]} added and set as default!`));
+                console.log(colors.hint(`Model: ${result.model}`));
             }
             break;
 
         case 'update':
             if (result.provider && result.apiKey) {
                 configManager.setApiKey(result.provider, result.apiKey);
-                console.log(colors.success(`\n  ${PROVIDER_DISPLAY_NAMES[result.provider]} API key updated!\n`));
+                console.log(colors.success(`${PROVIDER_DISPLAY_NAMES[result.provider]} API key updated!`));
             }
             break;
 
         case 'remove':
             if (result.provider) {
                 configManager.removeApiKey(result.provider);
-                console.log(colors.success(`\n  ${PROVIDER_DISPLAY_NAMES[result.provider]} removed.`));
+                console.log(colors.success(`${PROVIDER_DISPLAY_NAMES[result.provider]} removed.`));
 
                 // If new default was selected, update it
                 if (result.newDefaultProvider && result.newDefaultModel) {
                     configManager.set('defaultProvider', result.newDefaultProvider);
                     configManager.setModel(result.newDefaultProvider, result.newDefaultModel);
-                    console.log(colors.success(`  Default provider changed to ${PROVIDER_DISPLAY_NAMES[result.newDefaultProvider]}`));
-                    console.log(colors.hint(`  Model: ${result.newDefaultModel}`));
+                    console.log(colors.success(`Default provider changed to ${PROVIDER_DISPLAY_NAMES[result.newDefaultProvider]}`));
+                    console.log(colors.hint(`Model: ${result.newDefaultModel}`));
                 } else if (result.provider === defaultProvider) {
                     // No other providers configured - warn user
-                    console.log(colors.warning('  No providers configured.'));
-                    console.log(colors.hint('  Run "clai config wizard" to set up a provider.'));
+                    console.log(colors.warning('No providers configured.'));
+                    console.log(colors.hint('Run "clai config wizard" to set up a provider.'));
                 }
-                console.log('');
             }
             break;
 
         case 'default':
             if (result.provider) {
                 configManager.set('defaultProvider', result.provider);
-                console.log(colors.success(`\n  Default provider changed to ${PROVIDER_DISPLAY_NAMES[result.provider]}\n`));
+                console.log(colors.success(`Default provider changed to ${PROVIDER_DISPLAY_NAMES[result.provider]}`));
             }
             break;
     }
