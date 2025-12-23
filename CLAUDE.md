@@ -25,9 +25,10 @@ Before submitting any code changes, verify they conform to the style guide.
 | `src/cli/program.ts` | CLI command definitions |
 | `src/cli/commands/generate.ts` | Main command generation logic |
 | `src/config/schema.ts` | Types and shared constants (Provider, RiskLevel) |
-| `src/config/defaults.ts` | Default values and helper functions |
+| `src/config/defaults.ts` | Default values, fallback models, and helper functions |
 | `src/config/manager.ts` | Configuration persistence |
 | `src/providers/llm.ts` | AI provider wrapper |
+| `src/providers/models.ts` | Hybrid model fetcher (dynamic API + fallback) |
 | `src/system/detector.ts` | OS/shell detection |
 | `src/ui/colors.ts` | Centralized color utility |
 | `src/ui/wizard.ts` | Setup wizard facade and helper functions |
@@ -51,6 +52,7 @@ npm run lint       # Lint code
 2. **API keys**: Environment variables take priority over config file
 3. **Output**: UI goes to stderr, command output to stdout (for shell integration)
 4. **Shell integration**: `clai init` shows instructions only, never modifies files
+5. **Model fetching**: Models are fetched dynamically from provider APIs with fallback to curated list
 
 ## UI and Colors
 
@@ -114,5 +116,6 @@ Centralized constants to avoid duplication:
 | `PROVIDERS` | `config/schema.ts` | List of supported providers |
 | `RISK_LEVELS` | `config/schema.ts` | Valid risk level values |
 | `PROVIDER_ENV_VAR_NAMES` | `config/defaults.ts` | Provider to env var mapping |
-| `PROVIDER_MODELS` | `config/defaults.ts` | Available models per provider |
+| `PROVIDER_MODELS` | `config/defaults.ts` | Fallback models per provider |
+| `FALLBACK_MODELS` | `providers/models.ts` | Curated fallback model list |
 | `SHELL_RELOAD_COMMANDS` | `shell/integration.ts` | Shell reload commands |

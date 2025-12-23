@@ -16,6 +16,7 @@ import { renderAndWait } from '../utils/render.js';
 import { palette, colors } from '../colors.js';
 import type { Provider } from '../../config/schema.js';
 import { PROVIDERS, PROVIDER_DISPLAY_NAMES } from '../../config/schema.js';
+import { PROVIDER_MODELS } from '../../config/defaults.js';
 import type { ProviderManagerResult } from '../utils/types.js';
 
 /** Props for the ProviderManager screen. */
@@ -347,7 +348,7 @@ function ProviderManagerScreen({
 
             {view === 'model' && selectedProvider && (
                 <ModelSelector
-                    provider={selectedProvider}
+                    models={PROVIDER_MODELS[selectedProvider]}
                     message="Select default model:"
                     onSelect={handleModelSelect}
                     onCancel={handleCancel}
@@ -382,7 +383,7 @@ function ProviderManagerScreen({
 
             {view === 'newDefaultModel' && newDefaultProvider && (
                 <ModelSelector
-                    provider={newDefaultProvider}
+                    models={PROVIDER_MODELS[newDefaultProvider]}
                     message={`Select default model for ${PROVIDER_DISPLAY_NAMES[newDefaultProvider]}:`}
                     onSelect={handleNewDefaultModelSelect}
                     onCancel={handleCancel}

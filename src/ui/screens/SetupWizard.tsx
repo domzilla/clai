@@ -8,14 +8,16 @@
  * @fileoverview First-run setup wizard screen with combined step tabs and content view.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { ApiKeyInput } from '../components/domain/ApiKeyInput.js';
+import { Spinner } from '../components/base/Spinner.js';
 import { renderAndWait } from '../utils/render.js';
 import { palette, colors } from '../colors.js';
 import type { Provider } from '../../config/schema.js';
 import { PROVIDERS, PROVIDER_DISPLAY_NAMES } from '../../config/schema.js';
 import { PROVIDER_MODELS } from '../../config/defaults.js';
+import { getModels } from '../../providers/models.js';
 import type { SetupWizardResult } from '../utils/types.js';
 
 /** Props for the SetupWizard screen. */
@@ -60,7 +62,27 @@ function SetupWizardScreen({
     const [model, setModel] = useState<string | null>(null);
     const [commandCount, setCommandCount] = useState<number>(3);
 
-    const models = provider ? PROVIDER_MODELS[provider] : [];
+    // Dynamic model fetching state
+    const [models, setModels] = useState<string[]>([]);
+    const [isLoadingModels, setIsLoadingModels] = useState<boolean>(false);
+
+    // Fetch models when we have provider and API key
+    useEffect(() => {
+        if (provider && apiKey && currentStep === 'model' && models.length === 0) {
+            setIsLoadingModels(true);
+            getModels(provider, apiKey)
+                .then((fetchedModels) => {
+                    setModels(fetchedModels.length > 0 ? fetchedModels : PROVIDER_MODELS[provider]);
+                })
+                .catch(() => {
+                    // Fall back to static list on error
+                    setModels(PROVIDER_MODELS[provider]);
+                })
+                .finally(() => {
+                    setIsLoadingModels(false);
+                });
+        }
+    }, [provider, apiKey, currentStep, models.length]);
 
     // Handle step navigation
     const goToStep = (index: number): void => {
@@ -113,7 +135,7 @@ function SetupWizardScreen({
                     advanceToStep('apiKey');
                 }
             }
-        } else if (currentStep === 'model') {
+        } else if (currentStep === 'model' && !isLoadingModels && models.length > 0) {
             if (key.upArrow) {
                 setModelIndex((prev) => (prev - 1 + models.length) % models.length);
             } else if (key.downArrow) {
@@ -236,22 +258,26 @@ function SetupWizardScreen({
                         <Box marginBottom={1}>
                             <Text>Select your default model:</Text>
                         </Box>
-                        {models.map((m, idx) => {
-                            const isSelected = idx === modelIndex;
-                            return (
-                                <Box key={m}>
-                                    <Text color={isSelected ? palette.active : palette.control}>
-                                        {isSelected ? '❯ ' : '  '}
-                                    </Text>
-                                    <Text
-                                        bold={isSelected}
-                                        color={isSelected ? palette.active : palette.control}
-                                    >
-                                        {m}
-                                    </Text>
-                                </Box>
-                            );
-                        })}
+                        {isLoadingModels ? (
+                            <Spinner text="Fetching available models..." />
+                        ) : (
+                            models.map((m, idx) => {
+                                const isSelected = idx === modelIndex;
+                                return (
+                                    <Box key={m}>
+                                        <Text color={isSelected ? palette.active : palette.control}>
+                                            {isSelected ? '❯ ' : '  '}
+                                        </Text>
+                                        <Text
+                                            bold={isSelected}
+                                            color={isSelected ? palette.active : palette.control}
+                                        >
+                                            {m}
+                                        </Text>
+                                    </Box>
+                                );
+                            })
+                        )}
                     </Box>
                 )}
 

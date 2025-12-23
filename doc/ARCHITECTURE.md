@@ -20,7 +20,8 @@ src/
 │   ├── defaults.ts       # Default values, model lists, and helper functions
 │   └── manager.ts        # Config persistence (read/write ~/.clai/config)
 ├── providers/
-│   └── llm.ts            # LLM.js wrapper for AI provider communication
+│   ├── llm.ts            # LLM.js wrapper for AI provider communication
+│   └── models.ts         # Hybrid model fetcher (dynamic API + fallback)
 ├── prompts/
 │   ├── templates.ts      # System and user prompt templates
 │   └── builder.ts        # Prompt construction with system info injection
@@ -130,6 +131,13 @@ const RISK_LEVELS: RiskLevel[];
 - Constructs model identifier with provider prefix
 - Parses JSON response into `GeneratedCommand[]`
 - Validates risk levels
+
+**models.ts**: Hybrid model fetcher
+- Fetches available models from provider APIs (OpenAI, xAI, Gemini)
+- Falls back to curated list for providers without models API (Anthropic)
+- Caches results for 1 hour to avoid repeated API calls
+- Filters results to only include text generation models
+- Exports `getModels()` (async) and `getModelsSync()` (fallback only)
 
 ### 5. Prompt Layer (`src/prompts/`)
 
@@ -257,6 +265,9 @@ Using LLM.js provides a single API for multiple providers, simplifying provider 
 
 ### 7. Centralized Constants
 Shared constants like `PROVIDER_ENV_VAR_NAMES`, `RISK_LEVELS`, and `SHELL_RELOAD_COMMANDS` are defined once and reused across modules to prevent duplication and ensure consistency.
+
+### 8. Hybrid Model Fetching
+Available models are fetched dynamically from provider APIs when possible, with fallback to a curated list. This ensures users always have access to the latest models while maintaining reliability when APIs are unavailable.
 
 ## Testing Strategy
 

@@ -106,10 +106,12 @@ clai init powershell
 
 | Provider | Models |
 |----------|--------|
-| OpenAI | gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-3.5-turbo |
-| Anthropic | claude-3-5-sonnet, claude-3-5-haiku, claude-3-opus |
-| Google | gemini-2.0-flash, gemini-1.5-pro, gemini-1.5-flash |
-| xAI | grok-3, grok-3-fast, grok-2, grok-2-vision |
+| OpenAI | gpt-5.2, gpt-5.1, gpt-4.1, gpt-4.1-mini, o4-mini, o3 |
+| Anthropic | claude-opus-4-5, claude-sonnet-4-5, claude-haiku-4-5, claude-sonnet-4 |
+| Google | gemini-3-flash-preview, gemini-3-pro-preview, gemini-2.5-pro, gemini-2.5-flash |
+| xAI | grok-4-1-fast-reasoning, grok-4, grok-4-fast-reasoning, grok-3 |
+
+**Note:** CLAI automatically fetches available models from provider APIs when possible, falling back to a curated list.
 
 ## Environment Variables
 

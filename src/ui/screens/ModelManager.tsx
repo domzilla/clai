@@ -15,6 +15,8 @@ import { palette, colors } from '../colors.js';
 import type { Provider } from '../../config/schema.js';
 import { PROVIDER_DISPLAY_NAMES } from '../../config/schema.js';
 import { PROVIDER_MODELS } from '../../config/defaults.js';
+import { getModels } from '../../providers/models.js';
+import { configManager } from '../../config/manager.js';
 import type { ModelManagerResult } from '../utils/types.js';
 
 /** Props for the ModelManager screen. */
@@ -25,6 +27,8 @@ interface ModelManagerScreenProps {
     defaultProvider: Provider;
     /** Current models for each provider. */
     providerModels: Record<Provider, string | undefined>;
+    /** Available models for each provider (dynamically fetched or fallback). */
+    availableModels: Record<Provider, string[]>;
     /** Callback when complete. */
     onResult: (result: ModelManagerResult | null) => void;
 }
@@ -38,13 +42,14 @@ function ModelManagerScreen({
     configuredProviders,
     defaultProvider,
     providerModels,
+    availableModels,
     onResult,
 }: ModelManagerScreenProps): React.ReactElement {
     const [providerIndex, setProviderIndex] = useState<number>(() =>
         Math.max(0, configuredProviders.indexOf(defaultProvider)),
     );
     const selectedProvider = configuredProviders[providerIndex] ?? defaultProvider;
-    const models = PROVIDER_MODELS[selectedProvider];
+    const models = availableModels[selectedProvider] ?? PROVIDER_MODELS[selectedProvider];
     const currentModel = providerModels[selectedProvider];
 
     const [modelIndex, setModelIndex] = useState<number>(() => {
@@ -57,7 +62,7 @@ function ModelManagerScreen({
         setProviderIndex(newIndex);
         const newProvider = configuredProviders[newIndex];
         if (newProvider) {
-            const newModels = PROVIDER_MODELS[newProvider];
+            const newModels = availableModels[newProvider] ?? PROVIDER_MODELS[newProvider];
             const newCurrentModel = providerModels[newProvider];
             const idx = newModels.indexOf(newCurrentModel ?? '');
             setModelIndex(idx >= 0 ? idx : 0);
@@ -164,7 +169,28 @@ function ModelManagerScreen({
 }
 
 /**
+ * Fetches available models for all configured providers.
+ * Uses dynamic API fetching with fallback to curated list.
+ */
+async function fetchAvailableModels(
+    providers: Provider[],
+): Promise<Record<Provider, string[]>> {
+    const result: Record<Provider, string[]> = {} as Record<Provider, string[]>;
+
+    // Fetch models for all providers in parallel
+    await Promise.all(
+        providers.map(async (provider) => {
+            const apiKey = configManager.getApiKey(provider);
+            result[provider] = await getModels(provider, apiKey);
+        }),
+    );
+
+    return result;
+}
+
+/**
  * Runs the model manager screen.
+ * Fetches available models dynamically before showing the UI.
  * @param configuredProviders - Providers with API keys configured.
  * @param defaultProvider - Current default provider.
  * @param providerModels - Current models for each provider.
@@ -175,11 +201,15 @@ export async function runModelManager(
     defaultProvider: Provider,
     providerModels: Record<Provider, string | undefined>,
 ): Promise<ModelManagerResult | null> {
+    // Fetch available models before rendering
+    const availableModels = await fetchAvailableModels(configuredProviders);
+
     return renderAndWait<ModelManagerResult>((context) => (
         <ModelManagerScreen
             configuredProviders={configuredProviders}
             defaultProvider={defaultProvider}
             providerModels={providerModels}
+            availableModels={availableModels}
             onResult={(result) => {
                 if (result) {
                     context.resolve(result);

@@ -84,9 +84,12 @@ export async function selectModel(
     provider: Provider,
     currentModel?: string | undefined,
 ): Promise<string | null> {
+    const { PROVIDER_MODELS } = await import('../config/defaults.js');
+    const models = PROVIDER_MODELS[provider];
+
     return renderAndWait<string>((context) =>
         React.createElement(ModelSelector, {
-            provider,
+            models,
             currentModel,
             message: 'Select your default model:',
             onSelect: (model: string) => context.resolve(model),

@@ -21,25 +21,50 @@ export const DEFAULT_CONFIG: ClaiConfig = {
     },
 };
 
-/** Available models for each provider. */
+/**
+ * Curated fallback models for each provider.
+ * These are used when dynamic fetching fails or is unavailable.
+ * Updated December 2025. Use aliases without dates for stability.
+ */
 export const PROVIDER_MODELS: Record<Provider, string[]> = {
-    openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'],
-    anthropic: [
-        'claude-sonnet-4-20250514',
-        'claude-3-5-sonnet-20241022',
-        'claude-3-5-haiku-20241022',
-        'claude-3-opus-20240229',
+    openai: [
+        'gpt-5.2',
+        'gpt-5.1',
+        'gpt-4.1',
+        'gpt-4.1-mini',
+        'gpt-4.1-nano',
+        'o4-mini',
+        'o3',
     ],
-    gemini: ['gemini-2.0-flash-exp', 'gemini-1.5-pro', 'gemini-1.5-flash'],
-    xai: ['grok-3', 'grok-3-fast', 'grok-2', 'grok-2-vision'],
+    anthropic: [
+        'claude-opus-4-5',
+        'claude-sonnet-4-5',
+        'claude-haiku-4-5',
+        'claude-opus-4-1',
+        'claude-sonnet-4',
+    ],
+    gemini: [
+        'gemini-3-flash-preview',
+        'gemini-3-pro-preview',
+        'gemini-2.5-pro',
+        'gemini-2.5-flash',
+        'gemini-2.5-flash-lite',
+    ],
+    xai: [
+        'grok-4-1-fast-reasoning',
+        'grok-4-1-fast-non-reasoning',
+        'grok-4',
+        'grok-4-fast-reasoning',
+        'grok-3',
+    ],
 };
 
 /** Default model for each provider. */
 export const DEFAULT_MODELS: Record<Provider, string> = {
-    openai: 'gpt-4o-mini',
-    anthropic: 'claude-3-5-sonnet-20241022',
-    gemini: 'gemini-1.5-flash',
-    xai: 'grok-3-fast',
+    openai: 'gpt-4.1-mini',
+    anthropic: 'claude-sonnet-4-5',
+    gemini: 'gemini-2.5-flash',
+    xai: 'grok-4',
 };
 
 /** URLs where users can obtain API keys for each provider. */

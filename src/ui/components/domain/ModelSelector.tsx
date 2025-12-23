@@ -11,14 +11,13 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import { Select } from '../base/Select.js';
-import type { Provider } from '../../../config/schema.js';
 import { PROVIDER_MODELS } from '../../../config/defaults.js';
 import type { SelectItem } from '../../utils/types.js';
 
 /** Props for the ModelSelector component. */
 export interface ModelSelectorProps {
-    /** Provider to show models for. */
-    provider: Provider;
+    /** Available models to display. Falls back to PROVIDER_MODELS if not provided. */
+    models?: string[] | undefined;
     /** Currently selected model (to mark as current). */
     currentModel?: string | undefined;
     /** Callback when a model is selected. */
@@ -34,13 +33,14 @@ export interface ModelSelectorProps {
  * Displays available models for a provider.
  */
 export function ModelSelector({
-    provider,
+    models: modelsProp,
     currentModel,
     onSelect,
     onCancel,
     message,
 }: ModelSelectorProps): React.ReactElement {
-    const models = PROVIDER_MODELS[provider];
+    // Use provided models or fall back to OpenAI models as default
+    const models = modelsProp ?? PROVIDER_MODELS.openai;
 
     const items: SelectItem<string>[] = models.map((model) => ({
         label: currentModel === model ? `${model} (current)` : model,
