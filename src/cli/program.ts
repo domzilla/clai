@@ -58,5 +58,5 @@ configCmd.command('provider').description('Add, update, or remove API providers'
 // Shell integration command
 program
     .command('shell [type]')
-    .description('Show shell integration setup instructions')
+    .description('Show shell integration setup instructions (bash|zsh|fish|powershell)')
     .action(shellCommand);
