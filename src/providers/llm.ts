@@ -40,6 +40,8 @@ export interface GenerateOptions {
     model?: string;
     /** Number of commands to generate. */
     count?: number;
+    /** Output raw LLM response for debugging. */
+    raw?: boolean;
 }
 
 /** Raw response structure from LLM.js. */
@@ -96,6 +98,13 @@ export class LLMProvider {
                 model,
                 max_tokens: 4096,
             });
+
+            // Output raw response if requested (for debugging)
+            if (options.raw) {
+                console.error('\n=== RAW LLM RESPONSE ===');
+                console.error(response);
+                console.error('========================\n');
+            }
 
             // Parse JSON from response (strip markdown code fences if present)
             const jsonString = this.extractJson(response as string);

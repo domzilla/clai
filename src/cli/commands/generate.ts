@@ -35,6 +35,8 @@ export interface GenerateOptions {
     verbose?: boolean | undefined;
     /** Output only the command without menu. */
     quiet?: boolean | undefined;
+    /** Output raw LLM response for debugging. */
+    raw?: boolean | undefined;
 }
 
 /**
@@ -90,6 +92,7 @@ export async function generateCommand(
         : configManager.getPreference('commandCount');
     const verbose = options.verbose ?? configManager.getPreference('showExplanations');
     const quiet = options.quiet ?? false;
+    const raw = options.raw ?? false;
 
     // Detect system info
     const systemInfo = systemDetector.detect();
@@ -109,6 +112,7 @@ export async function generateCommand(
             provider,
             model,
             count,
+            raw,
         });
 
         spinnerInstance.clear();

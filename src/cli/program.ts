@@ -36,6 +36,7 @@ program
     .option('-n, --count <number>', 'Number of command options to generate')
     .option('-v, --verbose', 'Show detailed command explanations')
     .option('-q, --quiet', 'Output only the command (no menu, for scripts)')
+    .option('--raw', 'Output raw LLM response to stderr (for debugging)')
     .action(generateCommand);
 
 // Config subcommand
