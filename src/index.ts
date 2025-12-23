@@ -42,7 +42,7 @@ async function main(): Promise<void> {
         }
 
         // Continue to execute the provided command
-        console.log('  Now running your command...\n');
+        console.log('Now running your command...\n');
     }
 
     program.parse(process.argv);

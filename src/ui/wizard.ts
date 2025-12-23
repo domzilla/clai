@@ -122,7 +122,7 @@ export class SetupWizard {
         const result = await runSetupWizard();
 
         if (!result.completed) {
-            console.log(colors.hint('\n  Setup cancelled.\n'));
+            console.log(colors.hint('\nSetup cancelled.\n'));
             return false;
         }
 
@@ -132,12 +132,12 @@ export class SetupWizard {
         this.config.setModel(result.provider!, result.model!);
         this.config.setPreference('commandCount', result.commandCount ?? 3);
 
-        console.log(colors.success('\n  Configuration saved successfully!'));
-        console.log(colors.hint(`  Config file: ${this.config.getConfigPath()}\n`));
-        console.log(colors.value('  You can now use CLAI. Try:'));
-        console.log(colors.command('    clai "list all files in current directory"\n'));
-        console.log(colors.hint('  For shell integration (optional), run:'));
-        console.log(colors.command('    clai init\n'));
+        console.log(colors.success('\nConfiguration saved successfully!'));
+        console.log(colors.hint(`Config file: ${this.config.getConfigPath()}\n`));
+        console.log(colors.value('You can now use CLAI. Try:'));
+        console.log(colors.command('  clai "list all files in current directory"\n'));
+        console.log(colors.hint('For shell integration (optional), run:'));
+        console.log(colors.command('  clai init\n'));
 
         return true;
     }

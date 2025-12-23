@@ -53,8 +53,8 @@ export async function generateCommand(
 
     if (!prompt) {
         console.log(colors.warning('Missing prompt.') + ' Describe what command you need.\n');
-        console.log(colors.hint('  Example: clai "list all files larger than 100MB"\n'));
-        console.log(colors.hint('  Run clai -h for all options.'));
+        console.log(colors.hint('Example: clai "list all files larger than 100MB"\n'));
+        console.log(colors.hint('Run clai -h for all options.'));
         return;
     }
 
