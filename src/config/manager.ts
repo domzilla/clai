@@ -8,7 +8,7 @@
  * @fileoverview Configuration persistence with read/write to ~/.clai/config.
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
@@ -63,7 +63,7 @@ export class ConfigManager {
 
     private ensureConfigDir(): void {
         if (!existsSync(this.configDir)) {
-            mkdirSync(this.configDir, { recursive: true });
+            mkdirSync(this.configDir, { recursive: true, mode: 0o700 });
         }
     }
 
@@ -103,6 +103,7 @@ export class ConfigManager {
             stringifyToml(this.config as unknown as Record<string, unknown>),
             'utf-8',
         );
+        chmodSync(this.configPath, 0o600);
     }
 
     /**
