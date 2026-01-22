@@ -18,7 +18,7 @@ src/
 ├── config/
 │   ├── schema.ts         # TypeScript interfaces and shared type constants
 │   ├── defaults.ts       # Default values, model lists, and helper functions
-│   └── manager.ts        # Config persistence (read/write ~/.clai/config)
+│   └── manager.ts        # Config persistence (read/write ~/.config/clai/config)
 ├── providers/
 │   ├── llm.ts            # LLM.js wrapper for AI provider communication
 │   └── models.ts         # Hybrid model fetcher (dynamic API + fallback)
@@ -114,7 +114,7 @@ const RISK_LEVELS: RiskLevel[];
 ```
 
 **manager.ts**: Singleton `ConfigManager` class
-- Reads/writes `~/.clai/config` (TOML format)
+- Reads/writes `~/.config/clai/config` (TOML format)
 - Checks environment variables for API keys first
 - Provides typed getters/setters
 - Uses `createDefaultConfig()` helper for deep copying

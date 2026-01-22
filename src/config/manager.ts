@@ -5,7 +5,7 @@
  * @created 2025-12-21
  * @license MIT
  *
- * @fileoverview Configuration persistence with read/write to ~/.clai/config.
+ * @fileoverview Configuration persistence with read/write to ~/.config/clai/config.
  */
 
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -24,7 +24,7 @@ import {
 
 /**
  * Manages CLAI configuration persistence.
- * Reads and writes configuration to ~/.clai/config.
+ * Reads and writes configuration to ~/.config/clai/config.
  */
 export class ConfigManager {
     private configDir: string;
@@ -36,7 +36,7 @@ export class ConfigManager {
      * @param configDir - Optional custom config directory path.
      */
     constructor(configDir?: string) {
-        this.configDir = configDir || join(homedir(), '.clai');
+        this.configDir = configDir || join(homedir(), '.config', 'clai');
         this.configPath = join(this.configDir, 'config');
     }
 

@@ -158,7 +158,7 @@ clai "extract email addresses from a file"
 
 ## Configuration File
 
-Configuration is stored in `~/.clai/config` (TOML format):
+Configuration is stored in `~/.config/clai/config` (TOML format):
 
 ```toml
 defaultProvider = "openai"
