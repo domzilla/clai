@@ -46,7 +46,8 @@ jobs:
       - name: Create bottle structure
         run: |
           VERSION=${{ steps.version.outputs.version }}
-          BOTTLE_DIR="clai/$VERSION"
+          BOTTLE_ROOT="/tmp/bottle"
+          BOTTLE_DIR="$BOTTLE_ROOT/clai/$VERSION"
 
           # Create Homebrew-style directory structure
           mkdir -p "$BOTTLE_DIR/libexec"
@@ -66,7 +67,7 @@ jobs:
           VERSION=${{ steps.version.outputs.version }}
           BOTTLE_TAG=${{ matrix.bottle_tag }}
 
-          tar -czf "clai-${VERSION}.${BOTTLE_TAG}.bottle.tar.gz" clai
+          tar -czf "clai-${VERSION}.${BOTTLE_TAG}.bottle.tar.gz" -C /tmp/bottle clai
 
           # Calculate SHA256
           shasum -a 256 "clai-${VERSION}.${BOTTLE_TAG}.bottle.tar.gz" > "clai-${VERSION}.${BOTTLE_TAG}.bottle.tar.gz.sha256"
