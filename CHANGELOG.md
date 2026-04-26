@@ -10,51 +10,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2026-01-25
 
 ### Added
-- Initial implementation of clai - AI-powered shell command generator
-- Multi-provider support with dynamic model fetching and fallback
-- Providers: OpenAI, Anthropic, Google, xAI (Grok)
-- Interactive setup wizard with horizontal tabs UI built on Ink
-- Shell integration for bash, zsh, and fish with `shell` command
-- Quiet mode (`-q`) for reduced output and optimized token usage
-- Raw mode (`--raw`) for debugging LLM responses
-- Clipboard copy functionality in quiet mode
-- Custom model input with API validation and provider-specific placeholders
-- Config commands: `config model` and `config provider`
-- Per-provider default model storage
-- Cancel option in setup wizard
-- Centralized color scheme for consistent terminal output
-- Spinner while fetching models
-- JSDoc documentation for all public APIs
-- MIT License
-- Project documentation
+- Initial release of clai, an AI-powered shell command generator.
+- Multi-provider support for OpenAI, Anthropic, Google, and xAI (Grok), with dynamic model fetching and fallback.
+- Interactive setup wizard with horizontal tabs UI.
+- Shell integration for bash, zsh, and fish via the `shell` command.
+- Quiet mode (`-q`) for reduced output and clipboard copy of the generated command.
+- Raw mode (`--raw`) for debugging LLM responses.
+- Custom model input with API validation and provider-specific placeholders.
+- `config model` and `config provider` commands, plus per-provider default model storage.
+- `--version` flag and spinner while fetching models.
 
 ### Changed
-- Refactored UI from @inquirer/prompts to Ink with horizontal tabs navigation
-- Switched config file format from JSON to TOML (using smol-toml)
-- Moved config path to XDG location (`~/.config/clai`)
-- Renamed `init` command to `shell`
-- Renamed CLAUDE.md to AGENTS.md with symlink
-- Replaced Groq provider with xAI (Grok)
-- Use lowercase "clai" in all user-facing output
-- Improved model filtering with comprehensive exclusion list (dated variants, snapshots)
-- Limited model lists to 15 models maximum
-- Improved first-run and missing prompt UX
-- Improved provider removal flow with new default selection
-- Improved model not found error message
-- Shell detection now uses parent process
-- Applied code style guide with ESLint and Prettier
-- Refactored architecture to eliminate code duplication
-- Added strict TypeScript options
+- Switched config file format from JSON to TOML and moved its location to `~/.config/clai`.
+- Renamed the `init` command to `shell`.
+- Improved model filtering with a comprehensive exclusion list and a 15-model cap.
+- Shell detection now uses the parent process for accuracy.
 
 ### Fixed
-- Recursive copy in bottle creation by using /tmp
-- Truncated LLM responses by setting max_tokens
-- JSON parsing for responses wrapped in markdown code fences
-- Quiet mode cd prefix issue
-- Skip clipboard copy in quiet mode when stdout is piped
-- LLM.js provider communication
-- Wizard showing missing prompt message after setup
-- Active text color using proper styling
+- LLM responses are no longer truncated mid-output.
+- JSON parsing now handles responses wrapped in markdown code fences.
+- Quiet mode no longer prepends a stray `cd` and skips clipboard copy when stdout is piped.
+- Setup wizard no longer shows a stale "missing prompt" message after completion.
 
 ### Security
-- Set secure permissions on config file and directory
+- Config file and directory are now created with restrictive permissions.
